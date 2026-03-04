@@ -15,6 +15,7 @@
     "kaspa.js",
     "kaspa.d.ts"
   ],
+  "type": "module",
   "main": "kaspa.js",
   "types": "kaspa.d.ts"
 }

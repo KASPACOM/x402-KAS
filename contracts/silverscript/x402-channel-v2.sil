@@ -1,0 +1,36 @@
+pragma silverscript ^0.1.0;
+
+// x402 Payment Channel v2 — Single entrypoint
+// Combines settle and refund into one entrypoint to avoid
+// the multi-entrypoint dispatch stack layout bug.
+
+contract X402Channel(
+    pubkey client,
+    pubkey facilitator,
+    int initTimeout,
+    int initNonce
+) {
+    int timeout = initTimeout;
+    int nonce = initNonce;
+
+    // Single entrypoint: both client and facilitator sign for settle.
+    // If only client signs and time has passed, it's a refund (facilitator sig is ignored).
+    entrypoint function settle(sig clientSig, sig facilitatorSig) {
+        require(checkSig(clientSig, client));
+        require(checkSig(facilitatorSig, facilitator));
+
+        int inputValue = tx.inputs[this.activeInputIndex].value;
+        int paymentAmount = tx.outputs[0].value;
+        int minerFee = 5000;
+
+        require(paymentAmount > 0);
+        require(paymentAmount + minerFee <= inputValue);
+
+        int remainder = inputValue - paymentAmount - minerFee;
+
+        if (remainder > minerFee) {
+            validateOutputState(1, { nonce: nonce + 1, timeout: timeout });
+            require(tx.outputs[1].value == remainder);
+        }
+    }
+}
