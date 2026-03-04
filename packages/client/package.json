@@ -2,14 +2,24 @@
   "name": "@x402/kaspa",
   "version": "0.1.0",
   "description": "x402 Kaspa client SDK — create channels, build payments, manage refunds",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "scripts": {
     "build": "tsc",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@x402/kaspa-types": "workspace:*"
+    "@x402/kaspa-types": "workspace:*",
+    "@x402/kaspa-covenant": "workspace:*",
+    "kaspa-wasm": "workspace:*"
   },
   "license": "MIT"
 }

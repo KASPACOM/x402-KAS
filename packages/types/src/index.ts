@@ -102,6 +102,64 @@ export interface SupportedResponse {
 }
 
 // ------------------------------------------------------------
+// Compiled Contract Types (from SilverScript compiler)
+// ------------------------------------------------------------
+
+export interface CompiledContractAstTypeRef {
+  base: string;
+  array_dims?: { value: number }[];
+}
+
+export interface CompiledContractAstParam {
+  type_ref: CompiledContractAstTypeRef;
+  name: string;
+}
+
+export interface CompiledContractAstNode {
+  kind: string;
+  data: unknown;
+}
+
+export interface CompiledContractFunction {
+  name: string;
+  params: CompiledContractAstParam[];
+  entrypoint: boolean;
+  return_types: CompiledContractAstTypeRef[];
+  body: CompiledContractAstNode[];
+}
+
+export interface CompiledContractAst {
+  name: string;
+  params: CompiledContractAstParam[];
+  constants: Record<string, unknown>;
+  functions: CompiledContractFunction[];
+  fields?: any[];
+}
+
+export interface CompiledContractAbiInput {
+  name: string;
+  type_name: string;
+}
+
+export interface CompiledContractAbiEntry {
+  name: string;
+  inputs: CompiledContractAbiInput[];
+}
+
+export interface CompiledContract {
+  contract_name: string;
+  script: number[];
+  ast: CompiledContractAst;
+  abi: CompiledContractAbiEntry[];
+  without_selector: boolean;
+}
+
+export interface SpendOutput {
+  address: string;
+  amount: bigint;
+}
+
+// ------------------------------------------------------------
 // Kaspa-Specific Types
 // ------------------------------------------------------------
 

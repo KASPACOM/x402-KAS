@@ -2,11 +2,19 @@
   "name": "@x402/kaspa-types",
   "version": "0.1.0",
   "description": "Type definitions for x402 Kaspa payment protocol",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "scripts": {
     "build": "tsc",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
   },
   "license": "MIT"
 }

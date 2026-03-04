@@ -1,2 +1,2 @@
-export { KaspaFacilitator } from "./facilitator";
-export { createFacilitatorServer } from "./server";
+export { KaspaFacilitator, type FacilitatorConfig } from "./facilitator.js";
+export { createFacilitatorServer } from "./server.js";
