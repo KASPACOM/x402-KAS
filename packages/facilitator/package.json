@@ -1,0 +1,17 @@
+{
+  "name": "@x402/kaspa-facilitator",
+  "version": "0.1.0",
+  "description": "x402 Kaspa facilitator server — verify and settle covenant payments",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/server.ts",
+    "start": "node dist/server.js",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@x402/kaspa-types": "workspace:*"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,79 @@
+pragma silverscript ^0.1.0;
+
+// x402 Payment Channel for Kaspa L1
+//
+// A 2-of-2 escrow covenant enabling HTTP 402 micropayments.
+// Client locks KAS into this covenant. To pay for a resource,
+// the client partially signs a settlement TX. The facilitator
+// verifies and co-signs to complete settlement.
+//
+// Funds are protected: only client+facilitator together can settle,
+// and client can always reclaim after timeout.
+//
+// Flow:
+//   1. Client deploys covenant (locks funds)
+//   2. Client requests resource -> gets 402 + PaymentRequirements
+//   3. Client builds settle TX, signs their half
+//   4. Server forwards to facilitator for verification
+//   5. Facilitator co-signs, broadcasts -> resource served
+//
+// Supports multi-payment via state transitions:
+//   settle() pays server and returns change to same covenant
+//   with updated nonce (preventing replay).
+
+contract X402Channel(
+    pubkey client,          // Client's x-only public key (32 bytes)
+    pubkey facilitator,     // Facilitator's x-only public key (32 bytes)
+    int timeout,            // Absolute timestamp for refund eligibility
+    int nonce               // Incremented on each payment (replay protection)
+) {
+
+    // ================================================================
+    // settle: Pay a server for a resource
+    // ================================================================
+    // Both client and facilitator must sign.
+    // Output[0] = payment to server (enforced by covenant)
+    // Output[1] = change back to same covenant with nonce+1 (if funds remain)
+    //
+    // The server's pubkey and payment amount are implicitly validated:
+    // the facilitator only co-signs if they match the PaymentRequirements.
+    // The covenant enforces the structural integrity (change goes back
+    // to the same contract, nonce increments).
+
+    entrypoint function settle(sig clientSig, sig facilitatorSig) {
+        // Both parties must agree
+        require(checkSig(clientSig, client));
+        require(checkSig(facilitatorSig, facilitator));
+
+        // Get current covenant balance
+        int inputValue = tx.inputs[this.activeInputIndex].value;
+        int paymentAmount = tx.outputs[0].value;
+        int minerFee = 1000;  // 1000 sompi standard fee
+
+        // Sanity: payment must be positive and leave room for fee
+        require(paymentAmount > 0);
+        require(paymentAmount + minerFee <= inputValue);
+
+        // Calculate remainder
+        int remainder = inputValue - paymentAmount - minerFee;
+
+        // If enough remains for another payment + fee, preserve the channel
+        if (remainder > minerFee) {
+            // Output[1] must be the same covenant with incremented nonce
+            validateOutputState(1, { nonce: nonce + 1 });
+            require(tx.outputs[1].value == remainder);
+        }
+        // Otherwise: channel is fully drained, no change output needed
+    }
+
+    // ================================================================
+    // refund: Client reclaims funds after timeout
+    // ================================================================
+    // Only the client can trigger this, and only after the timeout.
+    // No facilitator cooperation needed.
+
+    entrypoint function refund(sig clientSig) {
+        require(checkSig(clientSig, client));
+        require(tx.time >= timeout);
+    }
+}

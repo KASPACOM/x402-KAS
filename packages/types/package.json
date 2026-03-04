@@ -1,0 +1,12 @@
+{
+  "name": "@x402/kaspa-types",
+  "version": "0.1.0",
+  "description": "Type definitions for x402 Kaspa payment protocol",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "license": "MIT"
+}
