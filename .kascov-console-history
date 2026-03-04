@@ -1,0 +1,3 @@
+#V2
+quit
+deploy /tmp/kascov-work/x402-channel.json 500000000

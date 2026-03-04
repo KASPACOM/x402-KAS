@@ -1,0 +1,8 @@
+[
+  {
+    "name": "deploy /tmp/x402-channel-deploy.json 500000000",
+    "private_key": "8d4d6d5988a030a19988d20eb5ce28d1c936c9ec7712f619405a2b2580c132c9",
+    "address": "kaspatest:qqv4lg3m6mcp5txzfauqjsxynufkhu5s2wtn8u0klw4ex2x5zu5sy87uapmel",
+    "created_at_unix_ms": 1772634547825
+  }
+]

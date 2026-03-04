@@ -25,6 +25,14 @@ export {
 } from "./template-patcher.js";
 
 export {
+  kascovDeploy,
+  kascovSpendSigned,
+  kascovBalance,
+  type KascovDeployResult,
+  type KascovSpendResult,
+} from "./kascov-cli.js";
+
+export {
   getCovenantAddress,
   connectRpc,
   getAddressUtxos,
