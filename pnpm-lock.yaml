@@ -50,6 +50,12 @@ importers:
 
   packages/kaspa-wasm: {}
 
+  packages/server:
+    dependencies:
+      '@x402/kaspa-types':
+        specifier: workspace:*
+        version: link:../types
+
   packages/types: {}
 
 packages:

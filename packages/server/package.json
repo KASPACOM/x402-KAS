@@ -1,0 +1,23 @@
+{
+  "name": "@x402/kaspa-server",
+  "version": "0.1.0",
+  "description": "x402 Kaspa resource server middleware — gate content behind micropayments",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@x402/kaspa-types": "workspace:*"
+  },
+  "license": "MIT"
+}
