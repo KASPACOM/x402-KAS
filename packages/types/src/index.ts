@@ -207,8 +207,8 @@ export interface SettleChannelResult {
 /** 1 KAS = 100,000,000 sompi */
 export const SOMPI_PER_KAS = 100_000_000n;
 
-/** Standard miner fee in sompi */
-export const STANDARD_FEE = 1000n;
+/** Standard miner fee in sompi (must match covenant's hardcoded minerFee) */
+export const STANDARD_FEE = 5000n;
 
 /** Kaspa CAIP-2 network identifiers */
 export type KaspaNetwork = "kaspa:mainnet" | "kaspa:testnet-11" | "kaspa:testnet-12";

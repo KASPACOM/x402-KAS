@@ -105,6 +105,7 @@ export function buildSigScript(
     const arg = functionArgs[i];
 
     if (input.type_name === "sig") {
+      // Kaspa checkSig expects 65 bytes: 64-byte Schnorr sig + 1-byte sighash type
       if (arg.length !== 65) throw new Error(`Expected sig "${input.name}" to be 65 bytes, got ${arg.length}`);
       builder.addData(arg);
     } else if (input.type_name === "pubkey") {
@@ -158,6 +159,12 @@ export function buildUnsignedCovenantTx(
 
 /**
  * Sign a transaction input with a private key, returning the 65-byte signature.
+ *
+ * createInputSignature returns a hex-encoded SCRIPT FRAGMENT:
+ *   [push-opcode: 0x41] [64-byte Schnorr sig] [1-byte sighash type]
+ * Total: 66 bytes as hex (132 chars).
+ *
+ * We strip the leading push opcode and return the raw 65-byte sig+sighash.
  */
 export function signInput(
   tx: Transaction,
@@ -165,7 +172,12 @@ export function signInput(
   privateKey: PrivateKey,
 ): Uint8Array {
   const sigHex = createInputSignature(tx, inputIndex, privateKey, SighashType.All);
-  return hexToBytes(sigHex);
+  const rawBytes = hexToBytes(sigHex);
+  // Strip leading push opcode if present (0x41 = push 65 bytes)
+  if (rawBytes.length === 66 && rawBytes[0] === 0x41) {
+    return rawBytes.slice(1); // 65 bytes: sig + sighash type
+  }
+  return rawBytes;
 }
 
 /**

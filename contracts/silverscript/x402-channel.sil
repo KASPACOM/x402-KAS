@@ -31,7 +31,7 @@ contract X402Channel(
 
         int inputValue = tx.inputs[this.activeInputIndex].value;
         int paymentAmount = tx.outputs[0].value;
-        int minerFee = 1000;
+        int minerFee = 5000;
 
         require(paymentAmount > 0);
         require(paymentAmount + minerFee <= inputValue);

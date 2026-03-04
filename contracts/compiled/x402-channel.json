@@ -106,8 +106,8 @@
     0,
     194,
     2,
-    232,
-    3,
+    136,
+    19,
     147,
     185,
     190,
@@ -119,12 +119,12 @@
     194,
     148,
     2,
-    232,
-    3,
+    136,
+    19,
     148,
     2,
-    232,
-    3,
+    136,
+    19,
     160,
     99,
     81,
@@ -185,8 +185,8 @@
     194,
     148,
     2,
-    232,
-    3,
+    136,
+    19,
     148,
     156,
     105,
@@ -470,10 +470,10 @@
               "name": "minerFee",
               "expr": {
                 "kind": "int",
-                "data": 1000,
-                "span": "1000"
+                "data": 5000,
+                "span": "5000"
               },
-              "span": "int minerFee = 1000;",
+              "span": "int minerFee = 5000;",
               "type_span": "int ",
               "modifier_spans": [],
               "name_span": "minerFee"
@@ -700,9 +700,9 @@
           }
         ],
         "return_type_spans": [],
-        "span": "entrypoint function settle(sig clientSig, sig facilitatorSig) {\n        require(checkSig(clientSig, client));\n        require(checkSig(facilitatorSig, facilitator));\n\n        int inputValue = tx.inputs[this.activeInputIndex].value;\n        int paymentAmount = tx.outputs[0].value;\n        int minerFee = 1000;\n\n        require(paymentAmount > 0);\n        require(paymentAmount + minerFee <= inputValue);\n\n        int remainder = inputValue - paymentAmount - minerFee;\n\n        if (remainder > minerFee) {\n            validateOutputState(1, { nonce: nonce + 1, timeout: timeout });\n            require(tx.outputs[1].value == remainder);\n        }\n    }",
+        "span": "entrypoint function settle(sig clientSig, sig facilitatorSig) {\n        require(checkSig(clientSig, client));\n        require(checkSig(facilitatorSig, facilitator));\n\n        int inputValue = tx.inputs[this.activeInputIndex].value;\n        int paymentAmount = tx.outputs[0].value;\n        int minerFee = 5000;\n\n        require(paymentAmount > 0);\n        require(paymentAmount + minerFee <= inputValue);\n\n        int remainder = inputValue - paymentAmount - minerFee;\n\n        if (remainder > minerFee) {\n            validateOutputState(1, { nonce: nonce + 1, timeout: timeout });\n            require(tx.outputs[1].value == remainder);\n        }\n    }",
         "name_span": "settle",
-        "body_span": "require(checkSig(clientSig, client));\n        require(checkSig(facilitatorSig, facilitator));\n\n        int inputValue = tx.inputs[this.activeInputIndex].value;\n        int paymentAmount = tx.outputs[0].value;\n        int minerFee = 1000;\n\n        require(paymentAmount > 0);\n        require(paymentAmount + minerFee <= inputValue);\n\n        int remainder = inputValue - paymentAmount - minerFee;\n\n        if (remainder > minerFee) {\n            validateOutputState(1, { nonce: nonce + 1, timeout: timeout });\n            require(tx.outputs[1].value == remainder);\n        }\n    "
+        "body_span": "require(checkSig(clientSig, client));\n        require(checkSig(facilitatorSig, facilitator));\n\n        int inputValue = tx.inputs[this.activeInputIndex].value;\n        int paymentAmount = tx.outputs[0].value;\n        int minerFee = 5000;\n\n        require(paymentAmount > 0);\n        require(paymentAmount + minerFee <= inputValue);\n\n        int remainder = inputValue - paymentAmount - minerFee;\n\n        if (remainder > minerFee) {\n            validateOutputState(1, { nonce: nonce + 1, timeout: timeout });\n            require(tx.outputs[1].value == remainder);\n        }\n    "
       },
       {
         "name": "refund",
@@ -770,7 +770,7 @@
         "body_span": "require(checkSig(clientSig, client));\n        require(tx.time >= timeout);"
       }
     ],
-    "span": "contract X402Channel(\n    pubkey client,          // Client's x-only public key (32 bytes)\n    pubkey facilitator,     // Facilitator's x-only public key (32 bytes)\n    int initTimeout,        // Absolute timestamp for refund eligibility\n    int initNonce           // Initial nonce (replay protection)\n) {\n    // State fields — these can be updated via validateOutputState\n    int timeout = initTimeout;\n    int nonce = initNonce;\n\n    // settle: Pay a server for a resource\n    // Both client and facilitator must sign.\n    // Output[0] = payment to server\n    // Output[1] = change back to same covenant with nonce+1 (if funds remain)\n    entrypoint function settle(sig clientSig, sig facilitatorSig) {\n        require(checkSig(clientSig, client));\n        require(checkSig(facilitatorSig, facilitator));\n\n        int inputValue = tx.inputs[this.activeInputIndex].value;\n        int paymentAmount = tx.outputs[0].value;\n        int minerFee = 1000;\n\n        require(paymentAmount > 0);\n        require(paymentAmount + minerFee <= inputValue);\n\n        int remainder = inputValue - paymentAmount - minerFee;\n\n        if (remainder > minerFee) {\n            validateOutputState(1, { nonce: nonce + 1, timeout: timeout });\n            require(tx.outputs[1].value == remainder);\n        }\n    }\n\n    // refund: Client reclaims funds after timeout\n    entrypoint function refund(sig clientSig) {\n        require(checkSig(clientSig, client));\n        require(tx.time >= timeout);\n    }\n}",
+    "span": "contract X402Channel(\n    pubkey client,          // Client's x-only public key (32 bytes)\n    pubkey facilitator,     // Facilitator's x-only public key (32 bytes)\n    int initTimeout,        // Absolute timestamp for refund eligibility\n    int initNonce           // Initial nonce (replay protection)\n) {\n    // State fields — these can be updated via validateOutputState\n    int timeout = initTimeout;\n    int nonce = initNonce;\n\n    // settle: Pay a server for a resource\n    // Both client and facilitator must sign.\n    // Output[0] = payment to server\n    // Output[1] = change back to same covenant with nonce+1 (if funds remain)\n    entrypoint function settle(sig clientSig, sig facilitatorSig) {\n        require(checkSig(clientSig, client));\n        require(checkSig(facilitatorSig, facilitator));\n\n        int inputValue = tx.inputs[this.activeInputIndex].value;\n        int paymentAmount = tx.outputs[0].value;\n        int minerFee = 5000;\n\n        require(paymentAmount > 0);\n        require(paymentAmount + minerFee <= inputValue);\n\n        int remainder = inputValue - paymentAmount - minerFee;\n\n        if (remainder > minerFee) {\n            validateOutputState(1, { nonce: nonce + 1, timeout: timeout });\n            require(tx.outputs[1].value == remainder);\n        }\n    }\n\n    // refund: Client reclaims funds after timeout\n    entrypoint function refund(sig clientSig) {\n        require(checkSig(clientSig, client));\n        require(tx.time >= timeout);\n    }\n}",
     "name_span": "X402Channel"
   },
   "abi": [
