@@ -236,7 +236,7 @@ A facilitator verifying an `exact`-scheme Kaspa payment MUST enforce ALL of the 
 
 ## Covenant Contract
 
-See `contracts/silverscript/x402-channel.sil` for the full SilverScript source.
+See `contracts/silverscript/x402-channel-v2.sil` for the production SilverScript source (single-entrypoint v2).
 
 ### Constructor Parameters
 
