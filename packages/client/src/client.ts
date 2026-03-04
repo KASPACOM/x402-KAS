@@ -23,10 +23,11 @@ import {
   type ChannelConfig,
   type ChannelParams,
   type TemplatePatch,
-  deployChannel,
   buildPartialSettle,
   refundChannel,
   getChannelAddress,
+  patchChannelContract,
+  kascovDeploy,
   connectRpc,
   getAddressUtxos,
 } from "@x402/kaspa-covenant";
@@ -41,8 +42,10 @@ export interface X402ClientConfig {
   privateKeyHex: string;
   /** CAIP-2 network identifier */
   network: KaspaNetwork;
-  /** Kaspa wRPC URL */
+  /** Kaspa wRPC URL (for WASM RPC calls) */
   rpcUrl: string;
+  /** Kaspa gRPC endpoint for kascov CLI (e.g. "tn12-node.kaspa.com:16210") */
+  kascovRpcUrl?: string;
   /** Compiled X402Channel covenant template */
   compiledTemplate: CompiledContract;
   /** Patch descriptor for template */
@@ -92,6 +95,7 @@ export class X402Client {
 
   /**
    * Open a payment channel with a facilitator.
+   * Uses kascov CLI for deployment (bypasses broken WASM createTransactions).
    */
   async openChannel(
     facilitatorPubkey: string,
@@ -108,15 +112,19 @@ export class X402Client {
       nonce: 0,
     };
 
-    const result = await deployChannel(
-      this.channelConfig,
-      params,
+    // Patch the covenant template with real args
+    const patched = patchChannelContract(this.channelConfig, params);
+
+    // Deploy via kascov CLI (works around WASM createTransactions crash)
+    const result = await kascovDeploy(
+      patched,
       amount,
       this.config.privateKeyHex,
+      this.config.kascovRpcUrl,
     );
 
     const channel: ChannelInfo = {
-      address: result.channelAddress,
+      address: result.contractAddress,
       outpoint: result.outpoint,
       clientPubkey: this.clientPubkey,
       facilitatorPubkey,
@@ -207,6 +215,7 @@ export class X402Client {
       channelOutpoint: channel.outpoint,
       clientPubkey: this.clientPubkey,
       currentNonce: channel.nonce,
+      channelTimeout: channel.timeout,
     };
 
     return {

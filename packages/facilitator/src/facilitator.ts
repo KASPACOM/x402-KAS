@@ -139,7 +139,7 @@ export class KaspaFacilitator {
       const channelParams: ChannelParams = {
         clientPubkey: paymentPayload.payload.clientPubkey,
         facilitatorPubkey: this.facilitatorPubkey,
-        timeout: 0, // Will be extracted from covenant — for now accept any
+        timeout: paymentPayload.payload.channelTimeout ?? 0,
         nonce: paymentPayload.payload.currentNonce,
       };
 
@@ -204,7 +204,7 @@ export class KaspaFacilitator {
       const channelParams: ChannelParams = {
         clientPubkey: paymentPayload.payload.clientPubkey,
         facilitatorPubkey: this.facilitatorPubkey,
-        timeout: 0, // TODO: extract from covenant
+        timeout: paymentPayload.payload.channelTimeout ?? 0,
         nonce: paymentPayload.payload.currentNonce,
       };
 

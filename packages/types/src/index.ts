@@ -42,7 +42,7 @@ export interface PaymentRequired {
 }
 
 export interface KaspaPayload {
-  /** Base64-encoded partially-signed Kaspa TX */
+  /** Client's Schnorr signature for the settle TX (hex) */
   transaction: string;
   /** Covenant UTXO being spent */
   channelOutpoint: CovenantOutpoint;
@@ -50,6 +50,8 @@ export interface KaspaPayload {
   clientPubkey: string;
   /** Current nonce in the covenant state */
   currentNonce: number;
+  /** Channel timeout (absolute timestamp) — needed by facilitator to derive address */
+  channelTimeout?: number;
 }
 
 export interface PaymentPayload {
