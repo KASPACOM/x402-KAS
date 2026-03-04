@@ -15,9 +15,9 @@
  */
 
 import { readFileSync } from "node:fs";
-import { X402Client } from "@x402/kaspa";
-import { extractPatchDescriptor } from "@x402/kaspa-covenant";
-import type { KaspaNetwork, CompiledContract, PaymentRequired } from "@x402/kaspa-types";
+import { X402Client } from "../../packages/client/dist/index.js";
+import { extractPatchDescriptor } from "../../packages/covenant/dist/index.js";
+import type { KaspaNetwork, CompiledContract, PaymentRequired } from "../../packages/types/dist/index.js";
 
 const API_URL = process.env.API_URL ?? "http://localhost:3000";
 const NETWORK = (process.env.KASPA_NETWORK ?? "kaspa:testnet-12") as KaspaNetwork;

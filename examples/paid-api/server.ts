@@ -17,8 +17,8 @@ import {
   parsePaymentHeader,
   processPayment,
   HttpFacilitatorClient,
-} from "@x402/kaspa-server";
-import type { KaspaNetwork } from "@x402/kaspa-types";
+} from "../../packages/server/dist/index.js";
+import type { KaspaNetwork } from "../../packages/types/dist/index.js";
 
 const PORT = parseInt(process.env.API_PORT ?? "3000", 10);
 const NETWORK = (process.env.KASPA_NETWORK ?? "kaspa:testnet-12") as KaspaNetwork;
