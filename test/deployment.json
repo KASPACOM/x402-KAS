@@ -1,0 +1,16 @@
+{
+  "txid": "2ae897adcb4268874412ac54e24eb619ae1b556291d2952414a43641cbaefc8d",
+  "channelAddress": "kaspatest:pz29eatyz78z2xkzhg29c04nt7q2duhnud9g700t2xtcrjrn24m77dzptxr8g",
+  "outpoint": {
+    "txid": "2ae897adcb4268874412ac54e24eb619ae1b556291d2952414a43641cbaefc8d",
+    "vout": 0
+  },
+  "clientPubkey": "b978573d693e17787e8bbb2fdf51bf866ef8de8784525eead9a54b91f6571ed7",
+  "facilitatorPubkey": "PLACEHOLDER_COMPILED_WITH_TEMPLATE_ARGS",
+  "timeout": "PLACEHOLDER_COMPILED_WITH_TEMPLATE_ARGS",
+  "nonce": 100,
+  "amount": "500000000",
+  "network": "testnet-12",
+  "rpcUrl": "ws://tn12-node.kaspa.com:17210",
+  "note": "Deployed via kascov CLI with template placeholder args. Contract uses silverc-compiled bytecode with placeholder pubkeys (bytes 1-32 and 33-64). Need to recompile with real args for an actual channel test."
+}
