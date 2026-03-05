@@ -164,7 +164,7 @@ Payment flow (per-settlement):
 
 Fee sweep (periodic, separate):
   Facilitator balance → POST /sweep → cold wallet
-                        kaspatest:qp0ymkekjr2zhwqslug44vwy9f26pju7heh4xx8reddtql7nsmg5z6cldgd75
+                        kaspatest:qqjaqusqvk3wa04mshalkmvd4w2jlf7ret7mpaskd9fmph7fhkxuxxh8gy49h
 ```
 
 To change cold wallet: set `FACILITATOR_FEE_ADDRESS` env var, restart facilitator.

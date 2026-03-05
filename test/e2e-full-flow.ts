@@ -44,7 +44,7 @@ const NETWORK = "testnet-12";
 const DEPLOY_AMOUNT = 500_000_000n; // 5 KAS (larger channel for realistic test)
 const PAYMENT_AMOUNT = 50_000_000n; // 0.5 KAS (premium API call)
 const FACILITATOR_FEE = 5_000_000n; // 0.05 KAS (10% fee)
-const COLD_WALLET = "kaspatest:qp0ymkekjr2zhwqslug44vwy9f26pju7heh4xx8reddtql7nsmg5z6cldgd75";
+const COLD_WALLET = "kaspatest:qqjaqusqvk3wa04mshalkmvd4w2jlf7ret7mpaskd9fmph7fhkxuxxh8gy49h";
 const EXPLORER = "https://tn12.kaspa.stream/transactions";
 
 function log(msg: string) {
