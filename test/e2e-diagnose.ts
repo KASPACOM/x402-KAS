@@ -170,7 +170,7 @@ async function main() {
       console.log(`\n  === DEPLOYMENT SUCCESSFUL ===`);
       console.log(`  TX: ${finalTxId}`);
       console.log(`  Channel: ${channelAddress}`);
-      console.log(`  Explorer: https://tn12.kaspa.stream/txs/${finalTxId}`);
+      console.log(`  Explorer: https://tn12.kaspa.stream/transactions/${finalTxId}`);
 
       // Find the output index
       const lastTx = created.transactions[created.transactions.length - 1].transaction;

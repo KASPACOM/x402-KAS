@@ -128,7 +128,7 @@ async function main() {
     console.log(`TX:      ${finalTxId}`);
     console.log(`Channel: ${channelAddress}`);
     console.log(`Vout:    ${vout}`);
-    console.log(`Explorer: https://tn12.kaspa.stream/txs/${finalTxId}`);
+    console.log(`Explorer: https://tn12.kaspa.stream/transactions/${finalTxId}`);
 
     // Save deployment info
     writeFileSync("/root/x402-kaspa/test/deployment.json", JSON.stringify({

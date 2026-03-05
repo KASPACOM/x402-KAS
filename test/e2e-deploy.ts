@@ -110,7 +110,7 @@ async function main() {
     console.log(`Channel address: ${result.channelAddress}`);
     console.log(`Outpoint:        ${result.outpoint.txid}:${result.outpoint.vout}`);
     console.log();
-    console.log(`Explorer: https://tn12.kaspa.stream/txs/${result.txid}`);
+    console.log(`Explorer: https://tn12.kaspa.stream/transactions/${result.txid}`);
     console.log();
 
     // Save deployment info for settle test

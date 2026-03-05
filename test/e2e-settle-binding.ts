@@ -250,7 +250,7 @@ async function main() {
   try {
     const result = await rpc.submitTransaction({ transaction: unsignedTx, allowOrphan: false });
     console.log(`\n=== SUCCESS === TX: ${result.transactionId}`);
-    console.log(`Explorer: https://tn12.kaspa.stream/txs/${result.transactionId}`);
+    console.log(`Explorer: https://tn12.kaspa.stream/transactions/${result.transactionId}`);
     console.log(`Payment:  ${paymentAmount} sompi → ${facilitatorAddress}`);
     console.log(`Change:   ${remainder} sompi → ${nextAddress} (nonce=1)`);
   } catch (err) {

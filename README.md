@@ -258,7 +258,7 @@ The client will:
 ### Step 7: Verify on Explorer
 
 ```
-https://tn12.kaspa.stream/txs/<your-txid>
+https://tn12.kaspa.stream/transactions/<your-txid>
 ```
 
 ---
@@ -283,7 +283,7 @@ npx tsx test/e2e-full-flow.ts         # Full payment flow with facilitator fee m
 | Settle with change (nonce 0→1) | Pass | — |
 | Settle no change (full drain) | Pass | — |
 | Chained settle (nonce 0→1→2) | Pass | — |
-| Full E2E (deploy + settle + verify) | Pass | [Deploy TX](https://tn12.kaspa.stream/txs/5201b38ed218ca4cf392a71ce446d75fd667b954e2efdebec1acf83e48892e2a) · [Settle TX](https://tn12.kaspa.stream/txs/3e40cd1ce8affc1bf3a7d9a01227153a729249435c7beab3435c840865afae53) |
+| Full E2E (deploy + settle + verify) | Pass | [Deploy TX](https://tn12.kaspa.stream/transactions/5201b38ed218ca4cf392a71ce446d75fd667b954e2efdebec1acf83e48892e2a) · [Settle TX](https://tn12.kaspa.stream/transactions/3e40cd1ce8affc1bf3a7d9a01227153a729249435c7beab3435c840865afae53) |
 | All 6 packages build | Pass | — |
 
 ---

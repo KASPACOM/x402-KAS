@@ -283,7 +283,7 @@ async function main() {
     console.log(`  SETTLE SUCCESS!`);
     console.log(`========================================`);
     console.log(`TX:      ${result.transactionId}`);
-    console.log(`Explorer: https://tn12.kaspa.stream/txs/${result.transactionId}`);
+    console.log(`Explorer: https://tn12.kaspa.stream/transactions/${result.transactionId}`);
     console.log(`Payment: ${paymentAmount} → ${facilitatorAddress}`);
     console.log(`Change:  ${remainder} → ${nextAddress} (nonce=1)`);
   } catch (err) {

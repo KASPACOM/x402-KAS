@@ -72,7 +72,7 @@ async function main() {
     console.log(`Address: ${result.contractAddress}`);
     console.log(`Outpoint: ${result.outpoint.txid}:${result.outpoint.vout}`);
     console.log(`Fee:     ${result.feeSompi} sompi`);
-    console.log(`Explorer: https://tn12.kaspa.stream/txs/${result.txid}`);
+    console.log(`Explorer: https://tn12.kaspa.stream/transactions/${result.txid}`);
 
     // Save for settle test
     const deployInfo = {

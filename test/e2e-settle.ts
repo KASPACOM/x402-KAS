@@ -99,7 +99,7 @@ async function main() {
   }
   console.log(`  TX:      ${deployResult.txid}`);
   console.log(`  Outpoint: ${deployResult.txid}:${deployResult.outpoint.vout}`);
-  console.log(`  Explorer: https://tn12.kaspa.stream/txs/${deployResult.txid}`);
+  console.log(`  Explorer: https://tn12.kaspa.stream/transactions/${deployResult.txid}`);
   console.log();
 
   // Wait for UTXO to appear
@@ -198,7 +198,7 @@ async function main() {
     console.log("  SETTLE SUCCESSFUL!");
     console.log("============================================");
     console.log(`  TX:       ${settleTxid}`);
-    console.log(`  Explorer: https://tn12.kaspa.stream/txs/${settleTxid}`);
+    console.log(`  Explorer: https://tn12.kaspa.stream/transactions/${settleTxid}`);
     console.log(`  Payment:  ${paymentAmount} sompi → ${payTo}`);
     if (remainder > fee) {
       console.log(`  Change:   ${remainder} sompi → covenant (nonce=1)`);

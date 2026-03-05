@@ -107,7 +107,7 @@ async function main() {
   if (res2.status === 200) {
     console.log("=== Payment successful! ===");
     if (data.txid) {
-      console.log(`TX: https://tn12.kaspa.stream/txs/${data.txid}`);
+      console.log(`TX: https://tn12.kaspa.stream/transactions/${data.txid}`);
     }
   } else {
     console.log("=== Payment failed ===");

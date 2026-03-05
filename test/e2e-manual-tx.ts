@@ -129,7 +129,7 @@ async function main() {
     console.log(`\n=== DEPLOYMENT SUCCESSFUL ===`);
     console.log(`TX:      ${txid}`);
     console.log(`Channel: ${channelAddress}`);
-    console.log(`Explorer: https://tn12.kaspa.stream/txs/${txid}`);
+    console.log(`Explorer: https://tn12.kaspa.stream/transactions/${txid}`);
 
     // Find output index
     let vout = 0;

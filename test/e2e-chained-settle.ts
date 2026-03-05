@@ -134,7 +134,7 @@ async function main() {
   const result1 = await settle(rpc, channelConfig, params0, entry0, facilitatorAddress, clientPk, facilitatorPk);
   console.log(`   TX: ${result1.txid}`);
   console.log(`   Change: ${result1.changeAmount} sompi → ${result1.nextAddress}`);
-  console.log(`   Explorer: https://tn12.kaspa.stream/txs/${result1.txid}`);
+  console.log(`   Explorer: https://tn12.kaspa.stream/transactions/${result1.txid}`);
 
   // ── Step 3: Wait for nonce=1 UTXO ──────────────
   console.log("\n   Waiting for nonce=1 UTXO...");
@@ -148,7 +148,7 @@ async function main() {
   const result2 = await settle(rpc, channelConfig, params1, entry1, facilitatorAddress, clientPk, facilitatorPk);
   console.log(`   TX: ${result2.txid}`);
   console.log(`   Change: ${result2.changeAmount} sompi → ${result2.nextAddress}`);
-  console.log(`   Explorer: https://tn12.kaspa.stream/txs/${result2.txid}`);
+  console.log(`   Explorer: https://tn12.kaspa.stream/transactions/${result2.txid}`);
 
   console.log("\n============================================");
   console.log("  CHAINED SETTLE SUCCESSFUL! (nonce 0→1→2)");
