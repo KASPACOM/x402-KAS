@@ -1,0 +1,10 @@
+services:
+  facilitator:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    ports:
+      - "4020:4020"
+    env_file:
+      - facilitator.env
+    restart: unless-stopped

@@ -1,0 +1,22 @@
+[Unit]
+Description=x402 Kaspa Facilitator
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/x402-kaspa
+ExecStart=/usr/bin/node packages/facilitator/dist/server.js
+Restart=always
+RestartSec=5
+EnvironmentFile=/root/.x402-facilitator.env
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/root/x402-kaspa /root/.x402-facilitator-key.json
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
