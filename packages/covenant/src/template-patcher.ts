@@ -7,7 +7,7 @@
  * with new values. This produces byte-identical output to a fresh compile.
  */
 
-import { Address, XOnlyPublicKey } from "kaspa-wasm";
+import { Address, XOnlyPublicKey } from "@x402/kaspa-wasm";
 import type { CompiledContract } from "@x402/kaspa-types";
 
 export type CtorArg =

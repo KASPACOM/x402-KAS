@@ -32,7 +32,7 @@ import {
   getAddressUtxos,
   getCovenantAddress,
 } from "@x402/kaspa-covenant";
-import { PrivateKey, type RpcClient } from "kaspa-wasm";
+import { PrivateKey, type RpcClient } from "@x402/kaspa-wasm";
 
 // ────────────────────────────────────────────────────────────────
 // Configuration

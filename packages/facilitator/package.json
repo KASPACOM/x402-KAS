@@ -23,7 +23,7 @@
   "dependencies": {
     "@x402/kaspa-types": "workspace:*",
     "@x402/kaspa-covenant": "workspace:*",
-    "kaspa-wasm": "workspace:*"
+    "@x402/kaspa-wasm": "workspace:*"
   },
   "author": "KaspaCom",
   "license": "MIT",

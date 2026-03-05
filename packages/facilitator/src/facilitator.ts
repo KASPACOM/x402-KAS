@@ -39,7 +39,7 @@ import {
   bytesToHex,
   type TemplatePatch,
 } from "@x402/kaspa-covenant";
-import { PrivateKey, createTransactions, type RpcClient } from "kaspa-wasm";
+import { PrivateKey, createTransactions, type RpcClient } from "@x402/kaspa-wasm";
 
 export interface FacilitatorConfig {
   /** Facilitator's private key (hex, 64 chars) */

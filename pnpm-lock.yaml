@@ -30,7 +30,7 @@ importers:
       '@x402/kaspa-types':
         specifier: workspace:*
         version: link:../types
-      kaspa-wasm:
+      '@x402/kaspa-wasm':
         specifier: workspace:*
         version: link:../kaspa-wasm
 
@@ -39,7 +39,7 @@ importers:
       '@x402/kaspa-types':
         specifier: workspace:*
         version: link:../types
-      kaspa-wasm:
+      '@x402/kaspa-wasm':
         specifier: workspace:*
         version: link:../kaspa-wasm
 
@@ -51,7 +51,7 @@ importers:
       '@x402/kaspa-types':
         specifier: workspace:*
         version: link:../types
-      kaspa-wasm:
+      '@x402/kaspa-wasm':
         specifier: workspace:*
         version: link:../kaspa-wasm
 

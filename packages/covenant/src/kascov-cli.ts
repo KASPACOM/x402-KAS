@@ -11,7 +11,7 @@ import { writeFileSync, mkdtempSync, rmSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import type { CompiledContract, CovenantOutpoint, SpendOutput } from "@x402/kaspa-types";
-import { PrivateKey as PK } from "kaspa-wasm";
+import { PrivateKey as PK } from "@x402/kaspa-wasm";
 
 const KASCOV_BIN = process.env.KASCOV_BIN ?? "/home/coder/projects/kaspa/kascov/target/release/kascov";
 const DEFAULT_RPC = process.env.KASPA_RPC ?? "tn12-node.kaspa.com:16210";
