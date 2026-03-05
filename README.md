@@ -3,6 +3,8 @@
 HTTP 402 payment protocol for Kaspa L1 using SilverScript covenants.
 
 > **Status:** All core flows tested and passing on Kaspa Testnet 12 (TN12). Pure WASM -- no external binary dependencies.
+>
+> **Explorer:** [tn12.kaspa.stream](https://tn12.kaspa.stream) — verify all TXs on-chain
 
 ## What Is This?
 
@@ -87,26 +89,30 @@ Pricing reference (1 KAS = 100,000,000 sompi):
 | 0.1 KAS | 10,000,000 | Premium data |
 | 1 KAS | 100,000,000 | Heavy compute |
 
-### Facilitator Fee (On Top)
+### Facilitator Fee (Facilitator-as-Payee Model)
 
-The facilitator can charge a fee that's deducted from each payment. This is set when starting the facilitator server:
+The facilitator receives the **full payment** in the on-chain settle TX, then forwards `(payment - fee)` to the merchant as a separate standard wallet operation. This is the same model as Stripe and traditional payment processors.
 
 ```bash
-FACILITATOR_FEE=100000 \            # 0.001 KAS per settlement
 FACILITATOR_PRIVATE_KEY=<hex> \
+FACILITATOR_FEE=100000 \
+FACILITATOR_FEE_ADDRESS=kaspatest:qp... \
   node packages/facilitator/dist/server.js
 ```
 
-**How it splits:** If the API charges 0.01 KAS and the facilitator fee is 0.001 KAS:
+**How it works:** If the API charges 0.01 KAS and the facilitator fee is 0.001 KAS:
 
-| Recipient | Amount | Description |
-|-----------|--------|-------------|
-| API Developer | 0.009 KAS | Payment minus facilitator fee |
-| Facilitator (KaspaCom) | 0.001 KAS | Per-settlement fee |
-| Kaspa Miners | 0.00005 KAS | Network miner fee (5000 sompi) |
-| Client channel | remaining | Change back to covenant |
+| Step | Recipient | Amount | Description |
+|------|-----------|--------|-------------|
+| Settle TX (on-chain) | Facilitator | 0.01 KAS | Full payment from covenant |
+| Settle TX (on-chain) | Covenant | remaining | Change back with nonce+1 |
+| Settle TX (on-chain) | Kaspa Miners | 0.00005 KAS | Miner fee (5000 sompi) |
+| Forward TX (wallet op) | API Developer | 0.009 KAS | Facilitator forwards to merchant |
+| Periodic sweep | Cold Wallet | accumulated | Facilitator sweeps fees |
 
-The fee is advertised in the 402 response via `facilitatorFee` and `facilitatorAddress` fields, so the client SDK knows how to split the outputs correctly. Both client and facilitator build identical TX outputs -- that's what makes the 2-of-2 signatures match.
+**Why this model?** Kaspa's KIP-9 storage mass formula penalizes small outputs relative to inputs. Splitting a covenant output into 3+ destinations (merchant + fee + change) exceeds the storage mass limit for typical payment amounts. The 2-output model (facilitator + change) works reliably.
+
+The fee is advertised in the 402 response via `facilitatorFee` and `facilitatorAddress` fields so clients know the fee structure upfront.
 
 ---
 
@@ -154,6 +160,7 @@ FACILITATOR_FEE=100000 \
 |----------|---------|-------------|
 | `FACILITATOR_PRIVATE_KEY` | *required* | 64-char hex private key |
 | `FACILITATOR_FEE` | `0` | Fee per settlement in sompi |
+| `FACILITATOR_FEE_ADDRESS` | signing address | Cold wallet for fee accumulation |
 | `KASPA_RPC` | `ws://tn12-node.kaspa.com:17210` | wRPC URL |
 | `KASPA_NETWORK` | `kaspa:testnet-12` | CAIP-2 network |
 | `PORT` | `4020` | Listen port |
@@ -267,18 +274,19 @@ npx tsx test/e2e-deploy.ts            # Deploy a covenant
 npx tsx test/e2e-settle.ts            # Deploy + settle (with change)
 npx tsx test/e2e-settle-nochange.ts   # Settle full drain
 npx tsx test/e2e-chained-settle.ts    # Chained settle (nonce 0->1->2)
+npx tsx test/e2e-full-flow.ts         # Full payment flow with facilitator fee model
 ```
 
 ## Test Results (TN12)
 
-| Test | Status |
-|------|--------|
-| Deploy covenant (WASM) | Pass |
-| Settle with change (nonce 0->1) | Pass |
-| Settle no change (full drain) | Pass |
-| Chained settle (nonce 0->1->2) | Pass |
-| Deploy-only test | Pass |
-| All 6 packages build | Pass |
+| Test | Status | On-Chain Proof |
+|------|--------|----------------|
+| Deploy covenant (WASM) | Pass | — |
+| Settle with change (nonce 0→1) | Pass | — |
+| Settle no change (full drain) | Pass | — |
+| Chained settle (nonce 0→1→2) | Pass | — |
+| Full E2E (deploy + settle + verify) | Pass | [Deploy TX](https://tn12.kaspa.stream/txs/5201b38ed218ca4cf392a71ce446d75fd667b954e2efdebec1acf83e48892e2a) · [Settle TX](https://tn12.kaspa.stream/txs/3e40cd1ce8affc1bf3a7d9a01227153a729249435c7beab3435c840865afae53) |
+| All 6 packages build | Pass | — |
 
 ---
 

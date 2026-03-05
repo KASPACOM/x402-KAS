@@ -199,19 +199,18 @@ export class X402Client {
       nonce: channel.nonce,
     };
 
-    const facilitatorFee = requirements.extra.facilitatorFee ? BigInt(requirements.extra.facilitatorFee) : undefined;
-    const facilitatorAddress = requirements.extra.facilitatorAddress;
+    // Facilitator-as-payee: payment goes to facilitator signing address (not merchant).
+    // Facilitator forwards (payment - fee) to merchant as a separate wallet operation.
+    const payTo = requirements.extra.facilitatorSigningAddress ?? requirements.payTo;
 
     const partial = await buildPartialSettle(
       this.channelConfig,
       params,
       channel.outpoint,
       channel.balance,
-      requirements.payTo,
+      payTo,
       paymentAmount,
       this.config.privateKeyHex,
-      undefined,
-      facilitatorFee && facilitatorAddress ? { facilitatorFee, facilitatorAddress } : undefined,
     );
 
     const payload: KaspaPayload = {

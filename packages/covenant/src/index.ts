@@ -8,7 +8,6 @@ export {
   type ChannelConfig,
   type ChannelParams,
   type PartiallySignedSettle,
-  type PartialSettleOptions,
   type SettleResult,
   type DeployChannelResult,
 } from "./channel.js";

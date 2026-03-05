@@ -70,7 +70,8 @@ export function createFacilitatorServer(config: FacilitatorConfig) {
           status: "ok",
           network: config.network,
           pubkey: facilitator.getPubkey(),
-          address: facilitator.getAddress(),
+          signingAddress: facilitator.getSigningAddress(),
+          feeAddress: facilitator.getFeeAddress(),
           feeSompi: facilitator.getFee().toString(),
         });
         return;
@@ -124,6 +125,7 @@ if (isMain) {
   const port = parseInt(process.env.PORT ?? "4020", 10);
   const minConfirmations = parseInt(process.env.MIN_CONFIRMATIONS ?? "10", 10);
   const feeSompi = process.env.FACILITATOR_FEE ? BigInt(process.env.FACILITATOR_FEE) : 0n;
+  const feeAddress = process.env.FACILITATOR_FEE_ADDRESS;
 
   // Load compiled covenant template
   const contractPath = process.env.COMPILED_CONTRACT_PATH
@@ -159,6 +161,7 @@ if (isMain) {
     patchDescriptor,
     minConfirmations,
     feeSompi,
+    feeAddress,
   };
 
   const { server, facilitator } = createFacilitatorServer(config);
@@ -177,9 +180,10 @@ if (isMain) {
   server.listen(port, () => {
     console.log(`[x402-facilitator] Listening on :${port}`);
     console.log(`[x402-facilitator] Network: ${network}`);
-    console.log(`[x402-facilitator] Pubkey:  ${facilitator.getPubkey()}`);
-    console.log(`[x402-facilitator] Address: ${facilitator.getAddress()}`);
-    console.log(`[x402-facilitator] Fee:     ${facilitator.getFee()} sompi`);
+    console.log(`[x402-facilitator] Pubkey:      ${facilitator.getPubkey()}`);
+    console.log(`[x402-facilitator] Signing:     ${facilitator.getSigningAddress()}`);
+    console.log(`[x402-facilitator] Fee Address: ${facilitator.getFeeAddress()}`);
+    console.log(`[x402-facilitator] Fee:         ${facilitator.getFee()} sompi`);
     console.log(`[x402-facilitator] Health:  http://localhost:${port}/health`);
   });
 }

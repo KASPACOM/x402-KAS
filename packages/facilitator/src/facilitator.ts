@@ -56,20 +56,24 @@ export interface FacilitatorConfig {
   minConfirmations?: number;
   /** Facilitator fee in sompi per settlement (default: 0) */
   feeSompi?: bigint;
+  /** Address to receive facilitator fees (cold wallet). Falls back to signing key address if not set. */
+  feeAddress?: string;
 }
 
 export class KaspaFacilitator {
   private config: FacilitatorConfig;
   private rpc: RpcClient | null = null;
   private facilitatorPubkey: string;
-  private facilitatorAddress: string;
+  private facilitatorSigningAddress: string;
+  private facilitatorFeeAddress: string;
   private channelConfig: ChannelConfig;
 
   constructor(config: FacilitatorConfig) {
     this.config = config;
     const pk = new PrivateKey(config.privateKeyHex);
     this.facilitatorPubkey = pk.toPublicKey().toXOnlyPublicKey().toString();
-    this.facilitatorAddress = pk.toAddress(NETWORK_IDS[config.network]).toString();
+    this.facilitatorSigningAddress = pk.toAddress(NETWORK_IDS[config.network]).toString();
+    this.facilitatorFeeAddress = config.feeAddress ?? this.facilitatorSigningAddress;
     this.channelConfig = {
       compiledTemplate: config.compiledTemplate,
       patchDescriptor: config.patchDescriptor,
@@ -88,7 +92,7 @@ export class KaspaFacilitator {
         {
           scheme: "exact",
           network: this.config.network,
-          signerAddress: this.facilitatorAddress,
+          signerAddress: this.facilitatorSigningAddress,
         },
       ],
     };
@@ -99,9 +103,14 @@ export class KaspaFacilitator {
     return this.facilitatorPubkey;
   }
 
-  /** Facilitator's Kaspa address */
-  getAddress(): string {
-    return this.facilitatorAddress;
+  /** Facilitator's signing address (derived from private key) */
+  getSigningAddress(): string {
+    return this.facilitatorSigningAddress;
+  }
+
+  /** Facilitator's fee address (cold wallet, or signing address if not configured) */
+  getFeeAddress(): string {
+    return this.facilitatorFeeAddress;
   }
 
   /** Facilitator fee in sompi */
@@ -236,23 +245,21 @@ export class KaspaFacilitator {
       }
 
       // 4. Reconstruct the settle TX (same outputs the client built)
+      //
+      // Revenue model (facilitator-as-payee):
+      //   output[0] = full payment → facilitator signing address
+      //   output[1] = change → covenant nonce+1 (if remainder > fee)
+      //
+      // The facilitator forwards (payment - fee) to the merchant as a
+      // separate standard wallet operation. This avoids Kaspa's KIP-9
+      // storage mass penalty that makes 3+ output covenant TXs impractical.
       const paymentAmount = BigInt(paymentRequirements.amount);
-      const facilitatorFee = this.config.feeSompi ?? 0n;
       const fee = STANDARD_FEE;
-      const merchantAmount = paymentAmount - facilitatorFee;
       const inputAmount = entry.amount;
       const remainder = inputAmount - paymentAmount - fee;
 
       const outputs: { address: string; amount: bigint }[] = [];
-
-      if (facilitatorFee > 0n && merchantAmount > 0n) {
-        // Split: merchant gets (payment - facilitatorFee), facilitator gets fee
-        outputs.push({ address: paymentRequirements.payTo, amount: merchantAmount });
-        outputs.push({ address: this.facilitatorAddress, amount: facilitatorFee });
-      } else {
-        // No fee: merchant gets full payment
-        outputs.push({ address: paymentRequirements.payTo, amount: paymentAmount });
-      }
+      outputs.push({ address: this.facilitatorSigningAddress, amount: paymentAmount });
 
       if (remainder > fee) {
         const nextParams = { ...channelParams, nonce: channelParams.nonce + 1 };

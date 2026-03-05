@@ -127,13 +127,18 @@ export interface PartiallySignedSettle {
  * Client builds and partially signs a settle transaction.
  * Returns the unsigned TX + client signature for the facilitator to complete.
  */
-export interface PartialSettleOptions {
-  /** Facilitator fee in sompi (deducted from paymentAmount, sent to facilitatorAddress) */
-  facilitatorFee?: bigint;
-  /** Facilitator's Kaspa address (required if facilitatorFee > 0) */
-  facilitatorAddress?: string;
-}
-
+/**
+ * Client builds and partially signs a settle transaction.
+ * Returns the unsigned TX + client signature for the facilitator to complete.
+ *
+ * Revenue model (facilitator-as-payee):
+ *   output[0] = full payment → payTo (should be facilitator's signing address)
+ *   output[1] = change → covenant nonce+1 (if remainder > miner fee)
+ *
+ * The facilitator forwards (payment - fee) to the merchant as a separate
+ * standard wallet operation. This avoids Kaspa's KIP-9 storage mass penalty
+ * that makes 3+ output covenant TXs impractical for small amounts.
+ */
 export async function buildPartialSettle(
   config: ChannelConfig,
   params: ChannelParams,
@@ -143,7 +148,6 @@ export async function buildPartialSettle(
   paymentAmount: bigint,
   clientPrivateKeyHex: string,
   existingRpc?: RpcClient,
-  options?: PartialSettleOptions,
 ): Promise<PartiallySignedSettle> {
   const patched = patchChannelContract(config, params);
   const channelAddress = getCovenantAddress(patched, config.network);
@@ -163,21 +167,11 @@ export async function buildPartialSettle(
       throw new Error(`Covenant UTXO ${outpoint.txid}:${outpoint.vout} not found at ${channelAddress}`);
     }
 
-    // Build outputs — split payment if facilitator fee is set
+    // Build outputs: payment to facilitator + optional change to covenant
     const fee = STANDARD_FEE;
-    const facilitatorFee = options?.facilitatorFee ?? 0n;
     const remainder = inputAmountSompi - paymentAmount - fee;
-    const outputs: SpendOutput[] = [];
+    const outputs: SpendOutput[] = [{ address: payTo, amount: paymentAmount }];
 
-    if (facilitatorFee > 0n && options?.facilitatorAddress) {
-      const merchantAmount = paymentAmount - facilitatorFee;
-      outputs.push({ address: payTo, amount: merchantAmount });
-      outputs.push({ address: options.facilitatorAddress, amount: facilitatorFee });
-    } else {
-      outputs.push({ address: payTo, amount: paymentAmount });
-    }
-
-    // If there's enough remainder, create a change output back to the covenant with nonce+1
     if (remainder > fee) {
       const nextParams = { ...params, nonce: params.nonce + 1 };
       const nextPatched = patchChannelContract(config, nextParams);

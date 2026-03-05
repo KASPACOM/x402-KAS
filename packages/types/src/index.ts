@@ -31,9 +31,11 @@ export interface KaspaExtra {
   facilitatorUrl: string;
   /** Facilitator's x-only public key (hex, 64 chars) */
   facilitatorPubkey: string;
-  /** Facilitator fee in sompi (deducted from payment, paid to facilitator address) */
+  /** Facilitator's signing address (where payment goes in settle TX) */
+  facilitatorSigningAddress?: string;
+  /** Facilitator fee in sompi (informational — deducted from payment before forwarding to merchant) */
   facilitatorFee?: string;
-  /** Facilitator's Kaspa address (to receive the fee) */
+  /** Facilitator's fee/cold wallet address (informational) */
   facilitatorAddress?: string;
 }
 

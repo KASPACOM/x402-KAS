@@ -1,0 +1,36 @@
+pragma silverscript ^0.1.0;
+
+// x402 Payment Channel v3 — Fee-aware
+// Allows extra outputs (facilitator fee, etc.) by relaxing
+// the change value check from == to <=.
+// Security: 2-of-2 signing means both parties agreed to ALL outputs.
+
+contract X402Channel(
+    pubkey client,
+    pubkey facilitator,
+    int initTimeout,
+    int initNonce
+) {
+    int timeout = initTimeout;
+    int nonce = initNonce;
+
+    entrypoint function settle(sig clientSig, sig facilitatorSig) {
+        require(checkSig(clientSig, client));
+        require(checkSig(facilitatorSig, facilitator));
+
+        int inputValue = tx.inputs[this.activeInputIndex].value;
+        int paymentAmount = tx.outputs[0].value;
+        int minerFee = 5000;
+
+        require(paymentAmount > 0);
+        require(paymentAmount + minerFee <= inputValue);
+
+        int remainder = inputValue - paymentAmount - minerFee;
+
+        if (remainder > minerFee) {
+            validateOutputState(1, { nonce: nonce + 1, timeout: timeout });
+            require(tx.outputs[1].value <= remainder);
+            require(tx.outputs[1].value > 0);
+        }
+    }
+}

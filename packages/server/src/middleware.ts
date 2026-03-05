@@ -19,6 +19,7 @@ import type {
   SettlementResponse,
   ResourceInfo,
   KaspaNetwork,
+  KaspaExtra,
 } from "@x402/kaspa-types";
 
 // ------------------------------------------------------------
@@ -38,6 +39,12 @@ export interface PaywallConfig {
   facilitatorPubkey: string;
   /** Max timeout seconds for payment channels (default: 3600) */
   maxTimeoutSeconds?: number;
+  /** Facilitator fee in sompi (optional, fetched from facilitator /health) */
+  facilitatorFee?: string;
+  /** Facilitator fee address (optional, fetched from facilitator /health) */
+  facilitatorFeeAddress?: string;
+  /** Facilitator signing address — payment destination in settle TX (fetched from facilitator /health) */
+  facilitatorSigningAddress?: string;
   /** Resource description shown in 402 response */
   description?: string;
   /** MIME type of the resource */
@@ -133,6 +140,18 @@ export function buildPaymentRequired(
     mimeType: config.mimeType ?? "application/json",
   };
 
+  const extra: KaspaExtra = {
+    facilitatorUrl: config.facilitatorUrl,
+    facilitatorPubkey: config.facilitatorPubkey,
+  };
+  if (config.facilitatorSigningAddress) {
+    extra.facilitatorSigningAddress = config.facilitatorSigningAddress;
+  }
+  if (config.facilitatorFee && config.facilitatorFeeAddress) {
+    extra.facilitatorFee = config.facilitatorFee;
+    extra.facilitatorAddress = config.facilitatorFeeAddress;
+  }
+
   const requirements: PaymentRequirements = {
     scheme: "exact",
     network: config.network,
@@ -140,10 +159,7 @@ export function buildPaymentRequired(
     asset: "KAS",
     payTo: config.payTo,
     maxTimeoutSeconds: config.maxTimeoutSeconds ?? 3600,
-    extra: {
-      facilitatorUrl: config.facilitatorUrl,
-      facilitatorPubkey: config.facilitatorPubkey,
-    },
+    extra,
   };
 
   return {
