@@ -221,7 +221,7 @@ export const STANDARD_FEE = 5000n;
  * To rotate: generate new keypair, update this constant, recompile x402-channel-v4-locked.sil,
  * and store the new private key in /root/.x402-facilitator-key.json.
  */
-export const KASPACOM_FACILITATOR_PUBKEY = "0596858e38f3a7352d5b93576726b2d43b7a6e9b5191a374c365f91294830353";
+export const KASPACOM_FACILITATOR_PUBKEY = "25d0720065a2eebebb85fbfb6d8dab952fa7c3cafdb0f6166953b0dfc9bd8dc3";
 
 /** Kaspa CAIP-2 network identifiers */
 export type KaspaNetwork = "kaspa:mainnet" | "kaspa:testnet-11" | "kaspa:testnet-12";

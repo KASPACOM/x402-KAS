@@ -13,7 +13,7 @@ contract X402Channel(
     int nonce = initNonce;
 
     entrypoint function settle(sig clientSig, sig facilitatorSig) {
-        pubkey facilitator = 0x0596858e38f3a7352d5b93576726b2d43b7a6e9b5191a374c365f91294830353;
+        pubkey facilitator = 0x25d0720065a2eebebb85fbfb6d8dab952fa7c3cafdb0f6166953b0dfc9bd8dc3;
 
         require(checkSig(clientSig, client));
         require(checkSig(facilitatorSig, facilitator));
