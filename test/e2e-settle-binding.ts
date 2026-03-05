@@ -8,7 +8,7 @@ import { randomBytes } from "node:crypto";
 import {
   patchChannelContract,
   getCovenantAddress,
-  kascovDeploy,
+  deployContract,
   connectRpc,
   getAddressUtxos,
   buildSigScript,
@@ -34,7 +34,6 @@ import type { CompiledContract, SpendOutput } from "../packages/types/dist/index
 import { blake2b } from "@noble/hashes/blake2b";
 
 const RPC_URL = "ws://tn12-node.kaspa.com:17210";
-const KASCOV_RPC = "tn12-node.kaspa.com:16210";
 const NETWORK = "testnet-12";
 const DEPLOY_AMOUNT = 100_000_000n; // 1 KAS
 
@@ -138,7 +137,7 @@ async function main() {
   const channelAddress = getCovenantAddress(patched, NETWORK);
   console.log(`   Address: ${channelAddress}`);
 
-  const deployResult = await kascovDeploy(patched, DEPLOY_AMOUNT, clientPrivateKey, KASCOV_RPC);
+  const deployResult = await deployContract(patched, DEPLOY_AMOUNT, RPC_URL, clientPrivateKey, NETWORK);
   console.log(`   TX: ${deployResult.txid}`);
 
   // ── Wait for UTXO ──────────────────────────────────
@@ -180,7 +179,7 @@ async function main() {
   const changeSpk = payToScriptHashScript(toScriptBytes(nextPatched));
 
   // Compute genesis covenant ID from the SPEND TX's perspective
-  // Since deploy was via kascov (no CovenantBinding), this spend IS the genesis.
+  // Since deploy was via WASM (no CovenantBinding yet), this spend IS the genesis.
   // The covenant ID is computed from: input[0] outpoint + authorized outputs
   // Authorized output = the change output (index 1) that goes back to covenant
   const changeSpkScript = typeof changeSpk.script === 'string' ? hexToBytes(changeSpk.script) : changeSpk.script;

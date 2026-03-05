@@ -4,7 +4,7 @@
  * Demonstrates the full payment flow:
  * 1. Request a paid resource → get 402
  * 2. Parse payment requirements
- * 3. Open a payment channel (deploy covenant via kascov)
+ * 3. Open a payment channel (deploy covenant via WASM)
  * 4. Build payment (partial-sign settle TX)
  * 5. Retry request with payment header → get content
  *
@@ -22,7 +22,6 @@ import type { KaspaNetwork, CompiledContract, PaymentRequired } from "../../pack
 const API_URL = process.env.API_URL ?? "http://localhost:3000";
 const NETWORK = (process.env.KASPA_NETWORK ?? "kaspa:testnet-12") as KaspaNetwork;
 const RPC_URL = process.env.KASPA_RPC ?? "ws://tn12-node.kaspa.com:17210";
-const KASCOV_RPC = process.env.KASCOV_RPC ?? "tn12-node.kaspa.com:16210";
 const PRIVATE_KEY = process.env.CLIENT_PRIVATE_KEY ?? "";
 const CHANNEL_FUNDING = BigInt(process.env.CHANNEL_FUNDING ?? "500000000"); // 5 KAS default
 
@@ -49,7 +48,6 @@ async function main() {
     privateKeyHex: PRIVATE_KEY,
     network: NETWORK,
     rpcUrl: RPC_URL,
-    kascovRpcUrl: KASCOV_RPC,
     compiledTemplate,
     patchDescriptor,
     defaultFunding: CHANNEL_FUNDING,

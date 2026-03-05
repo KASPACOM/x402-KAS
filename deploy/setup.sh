@@ -58,43 +58,7 @@ else
 fi
 
 # -----------------------------------------------------------
-# 4. Rust toolchain (for kascov)
-# -----------------------------------------------------------
-if command -v cargo &>/dev/null; then
-  info "Rust $(rustc --version | awk '{print $2}') already installed"
-else
-  info "Installing Rust toolchain (for kascov build)..."
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y >/dev/null 2>&1
-  source "$HOME/.cargo/env"
-  info "Rust $(rustc --version | awk '{print $2}') installed"
-fi
-# Ensure cargo is in PATH for this script
-export PATH="$HOME/.cargo/bin:$PATH"
-
-# -----------------------------------------------------------
-# 5. Clone and build kascov
-# -----------------------------------------------------------
-KASCOV_DIR="/opt/kascov"
-KASCOV_BIN="/usr/local/bin/kascov"
-
-if [[ -f "$KASCOV_BIN" ]]; then
-  info "kascov binary already at $KASCOV_BIN"
-else
-  info "Building kascov from source..."
-  if [[ -d "$KASCOV_DIR" ]]; then
-    cd "$KASCOV_DIR" && git pull -q
-  else
-    git clone --depth 1 https://github.com/aspect-build/kascov.git "$KASCOV_DIR" 2>/dev/null
-  fi
-  cd "$KASCOV_DIR"
-  cargo build --release >/dev/null 2>&1
-  cp target/release/kascov "$KASCOV_BIN"
-  chmod +x "$KASCOV_BIN"
-  info "kascov built and installed at $KASCOV_BIN"
-fi
-
-# -----------------------------------------------------------
-# 6. Clone x402-KAS repo
+# 4. Clone x402-KAS repo
 # -----------------------------------------------------------
 X402_DIR="/opt/x402-kaspa"
 
@@ -109,7 +73,7 @@ fi
 cd "$X402_DIR"
 
 # -----------------------------------------------------------
-# 7. Install dependencies and build
+# 5. Install dependencies and build
 # -----------------------------------------------------------
 info "Installing dependencies..."
 pnpm install --frozen-lockfile >/dev/null 2>&1 || pnpm install >/dev/null 2>&1
@@ -119,7 +83,7 @@ pnpm build >/dev/null 2>&1
 info "All packages built successfully"
 
 # -----------------------------------------------------------
-# 8. Create env file template
+# 6. Create env file template
 # -----------------------------------------------------------
 ENV_FILE="/opt/x402-kaspa/.env"
 if [[ ! -f "$ENV_FILE" ]]; then
@@ -135,22 +99,21 @@ KASPA_RPC=ws://tn12-node.kaspa.com:17210
 KASPA_NETWORK=kaspa:testnet-12
 PORT=4020
 MIN_CONFIRMATIONS=10
-KASCOV_BIN=/usr/local/bin/kascov
 
-# Paid API (optional — for the example server)
+# Paid API (optional -- for the example server)
 API_PORT=3000
 FACILITATOR_URL=http://localhost:4020
 FACILITATOR_PUBKEY=
 PAY_TO=
 PRICE_SOMPI=1000000
 ENVEOF
-  warn "Created $ENV_FILE — edit it with your keys before starting!"
+  warn "Created $ENV_FILE -- edit it with your keys before starting!"
 else
   info "Env file exists at $ENV_FILE"
 fi
 
 # -----------------------------------------------------------
-# 9. Create systemd services
+# 7. Create systemd services
 # -----------------------------------------------------------
 info "Creating systemd service files..."
 
@@ -195,7 +158,7 @@ SVCEOF
 systemctl daemon-reload
 
 # -----------------------------------------------------------
-# 10. Summary
+# 8. Summary
 # -----------------------------------------------------------
 echo ""
 echo "========================================="
@@ -203,7 +166,6 @@ echo "  x402-KAS Setup Complete"
 echo "========================================="
 echo ""
 echo "Installed at: $X402_DIR"
-echo "kascov:       $KASCOV_BIN"
 echo "Config:       $ENV_FILE"
 echo ""
 echo "Next steps:"

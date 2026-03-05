@@ -1,7 +1,7 @@
 /**
  * E2E Test: Full settle flow on TN12
  *
- * 1. Deploy covenant via kascov (lock 1 KAS)
+ * 1. Deploy covenant via WASM (lock 1 KAS)
  * 2. Client builds partial settle TX (signs client half)
  * 3. Facilitator co-signs + broadcasts
  * 4. Verify TX on chain
@@ -13,7 +13,7 @@ import {
   patchChannelContract,
   getChannelAddress,
   buildPartialSettle,
-  kascovDeploy,
+  deployContract,
   connectRpc,
   getAddressUtxos,
   getCovenantAddress,
@@ -31,7 +31,6 @@ import type { ChannelConfig, ChannelParams } from "../packages/covenant/dist/ind
 import type { CompiledContract, SpendOutput } from "../packages/types/dist/index.js";
 
 const RPC_URL = "ws://tn12-node.kaspa.com:17210";
-const KASCOV_RPC = "tn12-node.kaspa.com:16210";
 const NETWORK = "testnet-12";
 const DEPLOY_AMOUNT = 100_000_000n; // 1 KAS
 
@@ -85,15 +84,15 @@ async function main() {
     nonce,
   };
 
-  // ── Step 1: Deploy covenant via kascov ──────────────────
-  console.log("Step 1: Deploy covenant (1 KAS via kascov)...");
+  // ── Step 1: Deploy covenant via WASM ──────────────────
+  console.log("Step 1: Deploy covenant (1 KAS via WASM)...");
   const patched = patchChannelContract(channelConfig, params);
   const channelAddress = getCovenantAddress(patched, NETWORK);
   console.log(`  Channel address: ${channelAddress}`);
 
   let deployResult;
   try {
-    deployResult = await kascovDeploy(patched, DEPLOY_AMOUNT, clientPrivateKey, KASCOV_RPC);
+    deployResult = await deployContract(patched, DEPLOY_AMOUNT, RPC_URL, clientPrivateKey, NETWORK);
   } catch (err) {
     console.error("  Deploy failed:", err);
     process.exit(1);

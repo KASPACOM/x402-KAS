@@ -8,6 +8,7 @@ export {
   type ChannelConfig,
   type ChannelParams,
   type PartiallySignedSettle,
+  type PartialSettleOptions,
   type SettleResult,
   type DeployChannelResult,
 } from "./channel.js";
@@ -23,14 +24,6 @@ export {
   type CtorArg,
   type TemplatePatch,
 } from "./template-patcher.js";
-
-export {
-  kascovDeploy,
-  kascovSpendSigned,
-  kascovBalance,
-  type KascovDeployResult,
-  type KascovSpendResult,
-} from "./kascov-cli.js";
 
 export {
   getCovenantAddress,

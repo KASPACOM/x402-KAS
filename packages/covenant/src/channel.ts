@@ -127,6 +127,13 @@ export interface PartiallySignedSettle {
  * Client builds and partially signs a settle transaction.
  * Returns the unsigned TX + client signature for the facilitator to complete.
  */
+export interface PartialSettleOptions {
+  /** Facilitator fee in sompi (deducted from paymentAmount, sent to facilitatorAddress) */
+  facilitatorFee?: bigint;
+  /** Facilitator's Kaspa address (required if facilitatorFee > 0) */
+  facilitatorAddress?: string;
+}
+
 export async function buildPartialSettle(
   config: ChannelConfig,
   params: ChannelParams,
@@ -136,6 +143,7 @@ export async function buildPartialSettle(
   paymentAmount: bigint,
   clientPrivateKeyHex: string,
   existingRpc?: RpcClient,
+  options?: PartialSettleOptions,
 ): Promise<PartiallySignedSettle> {
   const patched = patchChannelContract(config, params);
   const channelAddress = getCovenantAddress(patched, config.network);
@@ -155,10 +163,19 @@ export async function buildPartialSettle(
       throw new Error(`Covenant UTXO ${outpoint.txid}:${outpoint.vout} not found at ${channelAddress}`);
     }
 
-    // Build outputs
+    // Build outputs — split payment if facilitator fee is set
     const fee = STANDARD_FEE;
+    const facilitatorFee = options?.facilitatorFee ?? 0n;
     const remainder = inputAmountSompi - paymentAmount - fee;
-    const outputs: SpendOutput[] = [{ address: payTo, amount: paymentAmount }];
+    const outputs: SpendOutput[] = [];
+
+    if (facilitatorFee > 0n && options?.facilitatorAddress) {
+      const merchantAmount = paymentAmount - facilitatorFee;
+      outputs.push({ address: payTo, amount: merchantAmount });
+      outputs.push({ address: options.facilitatorAddress, amount: facilitatorFee });
+    } else {
+      outputs.push({ address: payTo, amount: paymentAmount });
+    }
 
     // If there's enough remainder, create a change output back to the covenant with nonce+1
     if (remainder > fee) {

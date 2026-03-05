@@ -54,6 +54,8 @@ export interface FacilitatorConfig {
   patchDescriptor: TemplatePatch;
   /** Minimum DAA score confirmations (default: 10) */
   minConfirmations?: number;
+  /** Facilitator fee in sompi per settlement (default: 0) */
+  feeSompi?: bigint;
 }
 
 export class KaspaFacilitator {
@@ -95,6 +97,16 @@ export class KaspaFacilitator {
   /** Facilitator's x-only public key (hex) */
   getPubkey(): string {
     return this.facilitatorPubkey;
+  }
+
+  /** Facilitator's Kaspa address */
+  getAddress(): string {
+    return this.facilitatorAddress;
+  }
+
+  /** Facilitator fee in sompi */
+  getFee(): bigint {
+    return this.config.feeSompi ?? 0n;
   }
 
   // ----------------------------------------------------------
@@ -225,13 +237,22 @@ export class KaspaFacilitator {
 
       // 4. Reconstruct the settle TX (same outputs the client built)
       const paymentAmount = BigInt(paymentRequirements.amount);
+      const facilitatorFee = this.config.feeSompi ?? 0n;
       const fee = STANDARD_FEE;
+      const merchantAmount = paymentAmount - facilitatorFee;
       const inputAmount = entry.amount;
       const remainder = inputAmount - paymentAmount - fee;
 
-      const outputs: { address: string; amount: bigint }[] = [
-        { address: paymentRequirements.payTo, amount: paymentAmount },
-      ];
+      const outputs: { address: string; amount: bigint }[] = [];
+
+      if (facilitatorFee > 0n && merchantAmount > 0n) {
+        // Split: merchant gets (payment - facilitatorFee), facilitator gets fee
+        outputs.push({ address: paymentRequirements.payTo, amount: merchantAmount });
+        outputs.push({ address: this.facilitatorAddress, amount: facilitatorFee });
+      } else {
+        // No fee: merchant gets full payment
+        outputs.push({ address: paymentRequirements.payTo, amount: paymentAmount });
+      }
 
       if (remainder > fee) {
         const nextParams = { ...channelParams, nonce: channelParams.nonce + 1 };

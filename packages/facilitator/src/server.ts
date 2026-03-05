@@ -70,6 +70,8 @@ export function createFacilitatorServer(config: FacilitatorConfig) {
           status: "ok",
           network: config.network,
           pubkey: facilitator.getPubkey(),
+          address: facilitator.getAddress(),
+          feeSompi: facilitator.getFee().toString(),
         });
         return;
       }
@@ -121,6 +123,7 @@ if (isMain) {
   const network = (process.env.KASPA_NETWORK ?? "kaspa:testnet-12") as KaspaNetwork;
   const port = parseInt(process.env.PORT ?? "4020", 10);
   const minConfirmations = parseInt(process.env.MIN_CONFIRMATIONS ?? "10", 10);
+  const feeSompi = process.env.FACILITATOR_FEE ? BigInt(process.env.FACILITATOR_FEE) : 0n;
 
   // Load compiled covenant template
   const contractPath = process.env.COMPILED_CONTRACT_PATH
@@ -155,6 +158,7 @@ if (isMain) {
     compiledTemplate,
     patchDescriptor,
     minConfirmations,
+    feeSompi,
   };
 
   const { server, facilitator } = createFacilitatorServer(config);
@@ -174,6 +178,8 @@ if (isMain) {
     console.log(`[x402-facilitator] Listening on :${port}`);
     console.log(`[x402-facilitator] Network: ${network}`);
     console.log(`[x402-facilitator] Pubkey:  ${facilitator.getPubkey()}`);
+    console.log(`[x402-facilitator] Address: ${facilitator.getAddress()}`);
+    console.log(`[x402-facilitator] Fee:     ${facilitator.getFee()} sompi`);
     console.log(`[x402-facilitator] Health:  http://localhost:${port}/health`);
   });
 }

@@ -1,3 +1,4 @@
+import { createRequire as __nodeCreateRequire } from 'node:module';
 let wasm;
 
 const heap = new Array(128).fill(undefined);
@@ -14995,14 +14996,16 @@ async function __wbg_init(module_or_path) {
 
 export { initSync };
 export default __wbg_init;
-// Auto-init for Node.js environments (synchronous)
-if (typeof globalThis.process !== 'undefined' && typeof globalThis.window === 'undefined') {
-  const { createRequire } = await import('node:module');
-  const _require = createRequire(import.meta.url);
-  const { readFileSync } = _require('node:fs');
-  const { fileURLToPath } = _require('node:url');
-  const { dirname, join } = _require('node:path');
-  const __fn = fileURLToPath(import.meta.url);
-  const __dn = dirname(__fn);
-  initSync({ module: readFileSync(join(__dn, 'kaspa_bg.wasm')) });
-}
+// Auto-init for Node.js environments (synchronous, no top-level await)
+(function() {
+  try {
+    if (typeof globalThis.process === 'undefined' || typeof globalThis.window !== 'undefined') return;
+    const _require = __nodeCreateRequire(import.meta.url);
+    const _fs = _require('fs');
+    const _url = _require('url');
+    const _path = _require('path');
+    const __fn = _url.fileURLToPath(import.meta.url);
+    const __dn = _path.dirname(__fn);
+    initSync({ module: _fs.readFileSync(_path.join(__dn, 'kaspa_bg.wasm')) });
+  } catch (_e) { /* browser environment */ }
+})();

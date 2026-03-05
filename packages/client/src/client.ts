@@ -27,9 +27,10 @@ import {
   refundChannel,
   getChannelAddress,
   patchChannelContract,
-  kascovDeploy,
+  deployContract,
   connectRpc,
   getAddressUtxos,
+  getCovenantAddress,
 } from "@x402/kaspa-covenant";
 import { PrivateKey, type RpcClient } from "kaspa-wasm";
 
@@ -44,8 +45,6 @@ export interface X402ClientConfig {
   network: KaspaNetwork;
   /** Kaspa wRPC URL (for WASM RPC calls) */
   rpcUrl: string;
-  /** Kaspa gRPC endpoint for kascov CLI (e.g. "tn12-node.kaspa.com:16210") */
-  kascovRpcUrl?: string;
   /** Compiled X402Channel covenant template */
   compiledTemplate: CompiledContract;
   /** Patch descriptor for template */
@@ -95,7 +94,7 @@ export class X402Client {
 
   /**
    * Open a payment channel with a facilitator.
-   * Uses kascov CLI for deployment (bypasses broken WASM createTransactions).
+   * Deploys a covenant via WASM createTransactions.
    */
   async openChannel(
     facilitatorPubkey: string,
@@ -112,15 +111,15 @@ export class X402Client {
       nonce: 0,
     };
 
-    // Patch the covenant template with real args
     const patched = patchChannelContract(this.channelConfig, params);
+    const networkId = NETWORK_IDS[this.config.network];
 
-    // Deploy via kascov CLI (works around WASM createTransactions crash)
-    const result = await kascovDeploy(
+    const result = await deployContract(
       patched,
       amount,
+      this.config.rpcUrl,
       this.config.privateKeyHex,
-      this.config.kascovRpcUrl,
+      networkId,
     );
 
     const channel: ChannelInfo = {
@@ -200,6 +199,9 @@ export class X402Client {
       nonce: channel.nonce,
     };
 
+    const facilitatorFee = requirements.extra.facilitatorFee ? BigInt(requirements.extra.facilitatorFee) : undefined;
+    const facilitatorAddress = requirements.extra.facilitatorAddress;
+
     const partial = await buildPartialSettle(
       this.channelConfig,
       params,
@@ -208,6 +210,8 @@ export class X402Client {
       requirements.payTo,
       paymentAmount,
       this.config.privateKeyHex,
+      undefined,
+      facilitatorFee && facilitatorAddress ? { facilitatorFee, facilitatorAddress } : undefined,
     );
 
     const payload: KaspaPayload = {

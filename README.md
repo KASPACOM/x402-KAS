@@ -2,51 +2,134 @@
 
 HTTP 402 payment protocol for Kaspa L1 using SilverScript covenants.
 
-> **Status:** All core flows tested and passing on Kaspa Testnet 12 (TN12) -- deploy, settle, chained settle (nonce 0->1->2).
+> **Status:** All core flows tested and passing on Kaspa Testnet 12 (TN12). Pure WASM -- no external binary dependencies.
 
-## Architecture
+## What Is This?
+
+x402-kaspa lets any HTTP API accept Kaspa payments per-request. When someone calls a paid endpoint, they get a standard `402 Payment Required` response. Their app automatically pays and retries. Settlement happens on-chain via a 2-of-2 covenant smart contract.
+
+**Use cases:** paid APIs, AI agent micropayments, metered access, pay-per-call services, content paywalls.
+
+---
+
+## Who Is Who? (The 3 Roles)
+
+### API Developer (sells access)
+
+You have an API and want to charge per request. You install the `@x402/kaspa-server` middleware and set a price. That's it.
+
+- Installs: `@x402/kaspa-server` npm package
+- Configures: price per endpoint, their Kaspa address to receive payments, facilitator URL
+- Gets: KAS deposited to their address for every paid request
+
+### App Developer / Consumer (buys access)
+
+You want to call a paid API. You install the `@x402/kaspa` client SDK. The SDK handles channel opening, payment signing, and retries automatically.
+
+- Installs: `@x402/kaspa` npm package
+- Configures: their private key, Kaspa RPC URL
+- Funds: their Kaspa wallet with KAS (the SDK deploys a channel on first use)
+
+### Facilitator (KaspaCom -- the payment rail)
+
+The facilitator is the service that co-signs every settlement transaction. It validates that the covenant exists, the amounts are correct, then completes the 2-of-2 signature and broadcasts to the Kaspa network.
+
+- Runs: `@x402/kaspa-facilitator` server (hosted by KaspaCom, or self-hosted)
+- Earns: a configurable fee per settlement (e.g., 10,000 sompi = 0.0001 KAS per TX)
+- Provides: the trust layer -- neither client nor server can cheat
 
 ```
-+--------------+        +-------------------+        +---------------+
-|   Client     |--402-->|  Your API Server  |------->|  Facilitator  |
-|  (browser/   |<-pay---|  + x402 middleware |<-------|    Server     |
-|   SDK)       |        +-------------------+        +-------+-------+
-+------+-------+                                             |
-       |                                                     |
-       | open channel (kascov)                               | co-sign + broadcast
-       v                                                     v
-+-------------------------------------------------------------+
-|              Kaspa Network (TN12 -> Mainnet)                 |
-+-------------------------------------------------------------+
+APP (consumer)                    API SERVER (seller)                FACILITATOR (KaspaCom)
+     |                                  |                                  |
+     |--- GET /weather ---------------->|                                  |
+     |<-- 402: pay 0.01 KAS -----------|                                  |
+     |                                  |                                  |
+     | [SDK: open channel if needed]    |                                  |
+     | [SDK: sign partial settle TX]    |                                  |
+     |                                  |                                  |
+     |--- GET /weather + payment ------>|                                  |
+     |                                  |--- POST /settle + payment ------>|
+     |                                  |                                  | verify covenant UTXO
+     |                                  |                                  | co-sign TX
+     |                                  |                                  | broadcast to Kaspa
+     |                                  |<-- { txid, success } ------------|
+     |<-- 200: weather data ------------|                                  |
 ```
 
-### How It Works
+---
 
-1. **Client opens a channel** -- deploys an `X402Channel` SilverScript covenant, locking KAS in a 2-of-2 escrow
-2. **Client requests a resource** -- gets back `402 Payment Required` with price and facilitator info
-3. **Client builds payment** -- creates a partial TX spending the covenant, signs client half
-4. **Facilitator verifies** -- checks covenant UTXO exists, validates TX structure
-5. **Facilitator settles** -- co-signs (completing 2-of-2 Schnorr), broadcasts to Kaspa blockDAG
-6. **Channel persists** -- change returns to covenant with incremented nonce (supports sequential payments)
+## How Pricing Works
+
+### API Developer Sets The Price
+
+In your API server, you set the price per endpoint:
+
+```typescript
+// examples/paid-api/server.ts
+const PRICE_SOMPI = "1000000"; // 0.01 KAS per request
+
+// In your route handler:
+const paymentRequired = buildPaymentRequired(url, {
+  amount: PRICE_SOMPI,         // <-- you set this
+  payTo: "kaspa:qz...",        // <-- your wallet address
+  network: "kaspa:testnet-12",
+  facilitatorUrl: "http://facilitator.kaspacom.com:4020",
+  facilitatorPubkey: "abc123...",
+});
+```
+
+Pricing reference (1 KAS = 100,000,000 sompi):
+
+| Price | Sompi | Use Case |
+|-------|-------|----------|
+| 0.001 KAS | 100,000 | Cheap API call |
+| 0.01 KAS | 1,000,000 | Standard API call |
+| 0.1 KAS | 10,000,000 | Premium data |
+| 1 KAS | 100,000,000 | Heavy compute |
+
+### Facilitator Fee (On Top)
+
+The facilitator can charge a fee that's deducted from each payment. This is set when starting the facilitator server:
+
+```bash
+FACILITATOR_FEE=100000 \            # 0.001 KAS per settlement
+FACILITATOR_PRIVATE_KEY=<hex> \
+  node packages/facilitator/dist/server.js
+```
+
+**How it splits:** If the API charges 0.01 KAS and the facilitator fee is 0.001 KAS:
+
+| Recipient | Amount | Description |
+|-----------|--------|-------------|
+| API Developer | 0.009 KAS | Payment minus facilitator fee |
+| Facilitator (KaspaCom) | 0.001 KAS | Per-settlement fee |
+| Kaspa Miners | 0.00005 KAS | Network miner fee (5000 sompi) |
+| Client channel | remaining | Change back to covenant |
+
+The fee is advertised in the 402 response via `facilitatorFee` and `facilitatorAddress` fields, so the client SDK knows how to split the outputs correctly. Both client and facilitator build identical TX outputs -- that's what makes the 2-of-2 signatures match.
+
+---
 
 ## Packages
 
-| Package | Path | Description |
-|---------|------|-------------|
-| `@x402/kaspa-types` | `packages/types/` | Shared type definitions, constants, covenant ABI |
-| `@x402/kaspa-covenant` | `packages/covenant/` | Core covenant ops: deploy, settle, refund, template patching, kascov CLI wrapper |
-| `@x402/kaspa-facilitator` | `packages/facilitator/` | HTTP server: `/verify`, `/settle`, `/supported`, `/health` |
-| `@x402/kaspa` | `packages/client/` | Client SDK: channel management, payment construction, 402 auto-retry |
-| `@x402/kaspa-server` | `packages/server/` | Express middleware: paywall routes, 402 responses |
-| `kaspa-wasm` | `packages/kaspa-wasm/` | Vendored Kaspa WASM SDK v1.1.0-rc.3 |
+| Package | npm | Description |
+|---------|-----|-------------|
+| `@x402/kaspa-types` | `packages/types/` | Shared types and constants |
+| `@x402/kaspa-covenant` | `packages/covenant/` | Core covenant: deploy, settle, refund |
+| `@x402/kaspa-facilitator` | `packages/facilitator/` | Facilitator HTTP server |
+| `@x402/kaspa` | `packages/client/` | Client SDK: channels, payments, 402 auto-retry |
+| `@x402/kaspa-server` | `packages/server/` | API server middleware (Express, etc.) |
+| `kaspa-wasm` | `packages/kaspa-wasm/` | Kaspa WASM SDK (TN12 build) |
 
 ## Prerequisites
 
 - **Node.js** >= 20
 - **pnpm** >= 9
-- **kascov binary** -- Rust CLI for Kaspa covenant transactions ([patched kascov](https://github.com/aspect-build/kascov))
 - **Kaspa Testnet 12** node access (default: `tn12-node.kaspa.com`)
-- **Testnet KAS** -- fund your client wallet on TN12
+
+No Rust, no external binaries. Everything is pure JavaScript/WASM.
+
+---
 
 ## Quick Start
 
@@ -63,25 +146,25 @@ pnpm build
 
 ```bash
 FACILITATOR_PRIVATE_KEY=<64-char-hex> \
+FACILITATOR_FEE=100000 \
   node packages/facilitator/dist/server.js
 ```
-
-The facilitator reads the compiled covenant from `contracts/compiled/x402-channel.json` automatically.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `FACILITATOR_PRIVATE_KEY` | *required* | 64-char hex private key |
+| `FACILITATOR_FEE` | `0` | Fee per settlement in sompi |
 | `KASPA_RPC` | `ws://tn12-node.kaspa.com:17210` | wRPC URL |
 | `KASPA_NETWORK` | `kaspa:testnet-12` | CAIP-2 network |
 | `PORT` | `4020` | Listen port |
-| `MIN_CONFIRMATIONS` | `10` | DAA score confirmations |
 
 ### 3. Start Your Paid API
 
 ```bash
 FACILITATOR_URL=http://localhost:4020 \
-FACILITATOR_PUBKEY=<from-facilitator-health-endpoint> \
+FACILITATOR_PUBKEY=<from-health-endpoint> \
 PAY_TO=<your-kaspa-address> \
+PRICE_SOMPI=1000000 \
   npx tsx examples/paid-api/server.ts
 ```
 
@@ -92,9 +175,9 @@ CLIENT_PRIVATE_KEY=<64-char-hex> \
   npx tsx examples/paid-api/client.ts
 ```
 
-## Tutorial: End-to-End Payment on Testnet
+---
 
-This walkthrough takes you from zero to a working micropayment in ~10 minutes.
+## Tutorial: End-to-End Payment on Testnet
 
 ### Step 1: Install & Build
 
@@ -105,35 +188,29 @@ pnpm install
 pnpm build
 ```
 
-Make sure the `kascov` binary is available. Set its path if it's not in the default location:
-
-```bash
-export KASCOV_BIN=/path/to/kascov
-```
-
 ### Step 2: Generate Keys
-
-Generate a facilitator key and a client key (any 64-char hex string from 32 random bytes):
 
 ```bash
 # Facilitator key
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
-# Client key (run again for a different key)
+# Client key
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
 ### Step 3: Fund the Client Wallet
 
-Start the client script once to see its Kaspa address, then fund it with TN12 testnet KAS:
+Get the client's Kaspa address:
 
 ```bash
-CLIENT_PRIVATE_KEY=<your-client-key> npx tsx examples/paid-api/client.ts
-# It will print: "Client address: kaspatest:qz..."
-# Fund this address with at least 10 KAS on TN12
+node --input-type=module -e "
+import { PrivateKey } from './packages/kaspa-wasm/kaspa.js';
+const pk = new PrivateKey('<your-client-key>');
+console.log('Address:', pk.toAddress('testnet-12').toString());
+"
 ```
 
-You can get testnet KAS from the Kaspa TN12 faucet or another funded wallet.
+Fund it with at least 10 KAS on TN12 (faucet or another wallet).
 
 ### Step 4: Start the Facilitator
 
@@ -142,30 +219,25 @@ FACILITATOR_PRIVATE_KEY=<your-facilitator-key> \
   node packages/facilitator/dist/server.js
 ```
 
-You'll see output like:
-
+Output:
 ```
 [x402-facilitator] Listening on :4020
 [x402-facilitator] Network: kaspa:testnet-12
-[x402-facilitator] Pubkey:  <facilitator-pubkey-hex>
+[x402-facilitator] Pubkey:  <hex>
+[x402-facilitator] Address: kaspatest:qz...
+[x402-facilitator] Fee:     0 sompi
 ```
 
-Copy the pubkey -- you'll need it for the API server.
-
-### Step 5: Start the Paid API Server
-
-In a new terminal:
+### Step 5: Start the Paid API
 
 ```bash
 FACILITATOR_URL=http://localhost:4020 \
 FACILITATOR_PUBKEY=<pubkey-from-step-4> \
-PAY_TO=<any-kaspa-address-to-receive-payments> \
+PAY_TO=<any-kaspa-address> \
   npx tsx examples/paid-api/server.ts
 ```
 
 ### Step 6: Make a Payment
-
-In another terminal:
 
 ```bash
 CLIENT_PRIVATE_KEY=<your-client-key> \
@@ -173,90 +245,78 @@ CLIENT_PRIVATE_KEY=<your-client-key> \
 ```
 
 The client will:
-1. Request `/weather` and get a `402 Payment Required`
-2. Deploy a covenant channel (first time only, takes ~10s)
-3. Build a payment and retry the request
-4. Print the weather data and a TX ID
+1. Request `/weather` -- gets `402 Payment Required`
+2. Deploy a covenant channel (~5s, first time only)
+3. Sign a payment and retry
+4. Print the weather data and TX ID
 
 ### Step 7: Verify on Explorer
-
-Check your transaction on the TN12 block explorer:
 
 ```
 https://tn12.kaspa.stream/txs/<your-txid>
 ```
 
-Subsequent payments reuse the same channel -- the covenant nonce increments with each settle.
+---
 
-## Covenant Contract
+## Running Tests
 
-**Production contract:** `contracts/silverscript/x402-channel-v2.sil` (single-entrypoint, v2)
+E2E tests run on TN12 and require a funded wallet at `/root/.x402-testnet-key.json`:
 
+```bash
+npx tsx test/e2e-deploy.ts            # Deploy a covenant
+npx tsx test/e2e-settle.ts            # Deploy + settle (with change)
+npx tsx test/e2e-settle-nochange.ts   # Settle full drain
+npx tsx test/e2e-chained-settle.ts    # Chained settle (nonce 0->1->2)
 ```
-Constructor: (pubkey client, pubkey facilitator, int timeout, int nonce)
-Entrypoint:  settle(sig clientSig, sig facilitatorSig) -- 2-of-2 co-signed payment
-```
-
-The v2 contract uses a single `settle` entrypoint. This was adopted because the SilverScript compiler has a multi-entrypoint dispatch bug: in P2SH execution, state fields are pushed on top of the selector, so dispatch checks the wrong stack value. The single-entrypoint design (198 bytes) eliminates dispatch entirely and is more compact than v1 (259 bytes).
-
-Pre-compiled output: `contracts/compiled/x402-channel.json`
-
-The v1 multi-entrypoint contract (`x402-channel.sil`) with separate settle/refund is preserved for reference but is **not used in production**.
-
-### Settlement Details
-
-- **Miner fee:** 5,000 sompi (hardcoded in covenant)
-- **Nonce tracking:** Each settle increments the nonce in the change output's covenant state
-- **Chained payments:** Supported -- settle nonce 0->1, then 1->2, etc., on the same channel
-- **Change output:** If `remainder > minerFee`, change goes to a new covenant instance with `nonce + 1`
-
-## Technical Notes
-
-### WASM vs kascov
-
-The vendored `kaspa-wasm` SDK has a known issue: `createTransactions()` crashes with `RuntimeError: unreachable` on TN12. However, the low-level APIs work fine:
-- `new Transaction(...)` -- works
-- `createInputSignature()` -- works
-- `ScriptBuilder` -- works
-- `RpcClient` -- works
-
-**Deployment** uses the `kascov` Rust CLI (handles input selection internally). **Settlement** uses WASM low-level APIs directly (single covenant input, deterministic outputs).
-
-See `docs/wasm-vs-rust-strategy.md` for the full technical analysis.
-
-### Payment Protocol
-
-The x402 Kaspa scheme uses `exact` payments:
-- Payment amount specified in **sompi** (1 KAS = 100,000,000 sompi)
-- Standard miner fee: 5,000 sompi
-- Payment header: `PAYMENT-SIGNATURE` or `X-PAYMENT` (base64 JSON)
-- Network IDs follow CAIP-2: `kaspa:mainnet`, `kaspa:testnet-11`, `kaspa:testnet-12`
-
-See `specs/scheme_exact_kaspa.md` for the full protocol specification.
 
 ## Test Results (TN12)
 
 | Test | Status |
 |------|--------|
-| Covenant deployment (kascov) | Pass |
+| Deploy covenant (WASM) | Pass |
 | Settle with change (nonce 0->1) | Pass |
+| Settle no change (full drain) | Pass |
 | Chained settle (nonce 0->1->2) | Pass |
-| Facilitator server startup | Pass |
+| Deploy-only test | Pass |
 | All 6 packages build | Pass |
 
-E2E test scripts are in `test/e2e-*.ts`. Run them with:
+---
 
-```bash
-npx tsx test/e2e-deploy.ts        # Test covenant deployment
-npx tsx test/e2e-settle.ts        # Test full settle flow
+## Covenant Contract
+
+**Production contract:** `contracts/silverscript/x402-channel-v2.sil`
+
+```
+Constructor: (pubkey client, pubkey facilitator, int timeout, int nonce)
+Entrypoint:  settle(sig clientSig, sig facilitatorSig)
 ```
 
-## Deployment
+Single-entrypoint (198 bytes). The covenant validates:
+- Both client and facilitator signed (2-of-2 Schnorr)
+- Payment amount > 0
+- Payment + miner fee <= input value
+- If change exists: output goes to same contract with nonce + 1
 
-A VPS setup script is provided at `deploy/setup.sh`. It installs Node.js, pnpm, Rust, builds kascov, and clones the repo:
+### Constants
+
+| Constant | Value | Description |
+|----------|-------|-------------|
+| Miner fee | 5,000 sompi | Hardcoded in covenant |
+| 1 KAS | 100,000,000 sompi | Conversion rate |
+
+---
+
+## WASM
+
+Self-compiled from `tn12` branch of [kaspanet/rusty-kaspa](https://github.com/kaspanet/rusty-kaspa).
+
+To rebuild from source:
 
 ```bash
-bash deploy/setup.sh
+git clone --depth=1 --branch tn12 https://github.com/kaspanet/rusty-kaspa.git
+cd rusty-kaspa/wasm
+export RUSTFLAGS=-Ctarget-cpu=mvp
+wasm-pack build --weak-refs --target web --out-name kaspa --out-dir web/kaspa --features wasm32-sdk
 ```
 
 ## License

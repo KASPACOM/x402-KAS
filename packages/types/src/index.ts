@@ -31,6 +31,10 @@ export interface KaspaExtra {
   facilitatorUrl: string;
   /** Facilitator's x-only public key (hex, 64 chars) */
   facilitatorPubkey: string;
+  /** Facilitator fee in sompi (deducted from payment, paid to facilitator address) */
+  facilitatorFee?: string;
+  /** Facilitator's Kaspa address (to receive the fee) */
+  facilitatorAddress?: string;
 }
 
 export interface PaymentRequired {

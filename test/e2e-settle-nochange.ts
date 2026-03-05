@@ -8,7 +8,7 @@ import { randomBytes } from "node:crypto";
 import {
   patchChannelContract,
   getCovenantAddress,
-  kascovDeploy,
+  deployContract,
   connectRpc,
   getAddressUtxos,
   buildUnsignedCovenantTx,
@@ -24,7 +24,6 @@ import type { ChannelConfig, ChannelParams } from "../packages/covenant/dist/ind
 import type { CompiledContract, SpendOutput } from "../packages/types/dist/index.js";
 
 const RPC_URL = "ws://tn12-node.kaspa.com:17210";
-const KASCOV_RPC = "tn12-node.kaspa.com:16210";
 const NETWORK = "testnet-12";
 const DEPLOY_AMOUNT = 100_000_000n; // 1 KAS
 
@@ -71,7 +70,7 @@ async function main() {
   const patched = patchChannelContract(channelConfig, params);
   const channelAddress = getCovenantAddress(patched, NETWORK);
 
-  const deployResult = await kascovDeploy(patched, DEPLOY_AMOUNT, clientPrivateKey, KASCOV_RPC);
+  const deployResult = await deployContract(patched, DEPLOY_AMOUNT, RPC_URL, clientPrivateKey, NETWORK);
   console.log(`TX: ${deployResult.txid}`);
 
   // Wait for UTXO
