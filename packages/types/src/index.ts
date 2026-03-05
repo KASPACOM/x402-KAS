@@ -216,6 +216,13 @@ export const SOMPI_PER_KAS = 100_000_000n;
 /** Standard miner fee in sompi (must match covenant's hardcoded minerFee) */
 export const STANDARD_FEE = 5000n;
 
+/**
+ * KaspaCom's official facilitator x-only public key (hardcoded in covenant bytecode).
+ * To rotate: generate new keypair, update this constant, recompile x402-channel-v4-locked.sil,
+ * and store the new private key in /root/.x402-facilitator-key.json.
+ */
+export const KASPACOM_FACILITATOR_PUBKEY = "0596858e38f3a7352d5b93576726b2d43b7a6e9b5191a374c365f91294830353";
+
 /** Kaspa CAIP-2 network identifiers */
 export type KaspaNetwork = "kaspa:mainnet" | "kaspa:testnet-11" | "kaspa:testnet-12";
 
@@ -237,10 +244,11 @@ export const X402_CHANNEL_ABI = {
   contractName: "X402Channel",
   constructorParams: [
     { name: "client", type: "pubkey" },
-    { name: "facilitator", type: "pubkey" },
     { name: "timeout", type: "int" },
     { name: "nonce", type: "int" },
   ],
+  /** Facilitator pubkey is hardcoded in covenant bytecode (not a constructor param) */
+  hardcodedFacilitator: KASPACOM_FACILITATOR_PUBKEY,
   entrypoints: [
     {
       name: "settle",
@@ -250,14 +258,6 @@ export const X402_CHANNEL_ABI = {
         { name: "facilitatorSig", type: "sig" },
       ],
       sigOpCount: 2,
-    },
-    {
-      name: "refund",
-      selector: 1,
-      inputs: [
-        { name: "clientSig", type: "sig" },
-      ],
-      sigOpCount: 1,
     },
   ],
 } as const;

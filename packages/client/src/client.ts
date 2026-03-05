@@ -18,7 +18,7 @@ import type {
   ChannelInfo,
   CompiledContract,
 } from "@x402/kaspa-types";
-import { STANDARD_FEE, NETWORK_IDS } from "@x402/kaspa-types";
+import { STANDARD_FEE, NETWORK_IDS, KASPACOM_FACILITATOR_PUBKEY } from "@x402/kaspa-types";
 import {
   type ChannelConfig,
   type ChannelParams,
@@ -97,16 +97,20 @@ export class X402Client {
    * Deploys a covenant via WASM createTransactions.
    */
   async openChannel(
-    facilitatorPubkey: string,
+    facilitatorPubkey?: string,
     amountSompi?: bigint,
     timeoutSeconds?: number,
   ): Promise<ChannelInfo> {
+    const pubkey = facilitatorPubkey ?? KASPACOM_FACILITATOR_PUBKEY;
+    if (pubkey !== KASPACOM_FACILITATOR_PUBKEY) {
+      throw new Error(`Unauthorized facilitator pubkey. Only KaspaCom facilitator is supported: ${KASPACOM_FACILITATOR_PUBKEY}`);
+    }
     const amount = amountSompi ?? this.config.defaultFunding ?? 1_000_000_000n;
     const timeout = Math.floor(Date.now() / 1000) + (timeoutSeconds ?? this.config.defaultTimeout ?? 86400);
 
     const params: ChannelParams = {
       clientPubkey: this.clientPubkey,
-      facilitatorPubkey,
+      facilitatorPubkey: pubkey,
       timeout,
       nonce: 0,
     };
@@ -126,13 +130,13 @@ export class X402Client {
       address: result.contractAddress,
       outpoint: result.outpoint,
       clientPubkey: this.clientPubkey,
-      facilitatorPubkey,
+      facilitatorPubkey: pubkey,
       timeout,
       nonce: 0,
       balance: amount,
     };
 
-    this.channels.set(facilitatorPubkey, channel);
+    this.channels.set(pubkey, channel);
     return channel;
   }
 

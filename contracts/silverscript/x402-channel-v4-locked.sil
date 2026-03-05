@@ -1,0 +1,35 @@
+pragma silverscript ^0.1.0;
+
+// x402 Payment Channel v4 — KaspaCom-locked facilitator
+// The facilitator pubkey is hardcoded. Only KaspaCom can co-sign.
+// To rotate: change the pubkey hex below, recompile, update TypeScript constant.
+
+contract X402Channel(
+    pubkey client,
+    int initTimeout,
+    int initNonce
+) {
+    int timeout = initTimeout;
+    int nonce = initNonce;
+
+    entrypoint function settle(sig clientSig, sig facilitatorSig) {
+        pubkey facilitator = 0x0596858e38f3a7352d5b93576726b2d43b7a6e9b5191a374c365f91294830353;
+
+        require(checkSig(clientSig, client));
+        require(checkSig(facilitatorSig, facilitator));
+
+        int inputValue = tx.inputs[this.activeInputIndex].value;
+        int paymentAmount = tx.outputs[0].value;
+        int minerFee = 5000;
+
+        require(paymentAmount > 0);
+        require(paymentAmount + minerFee <= inputValue);
+
+        int remainder = inputValue - paymentAmount - minerFee;
+
+        if (remainder > minerFee) {
+            validateOutputState(1, { nonce: nonce + 1, timeout: timeout });
+            require(tx.outputs[1].value == remainder);
+        }
+    }
+}

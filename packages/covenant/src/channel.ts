@@ -8,7 +8,7 @@
  */
 
 import type { CompiledContract, CovenantOutpoint, SpendOutput } from "@x402/kaspa-types";
-import { STANDARD_FEE } from "@x402/kaspa-types";
+import { STANDARD_FEE, KASPACOM_FACILITATOR_PUBKEY } from "@x402/kaspa-types";
 import {
   buildSigScript,
   buildUnsignedCovenantTx,
@@ -54,17 +54,34 @@ export interface ChannelParams {
 
 /**
  * Produce a CompiledContract with real constructor args patched in.
+ *
+ * The v4-locked contract has 3 constructor params: (client, timeout, nonce).
+ * The facilitator pubkey is hardcoded in the bytecode — not patchable.
+ * Legacy v2 contracts had 4 params: (client, facilitator, timeout, nonce).
  */
 export function patchChannelContract(
   config: ChannelConfig,
   params: ChannelParams,
 ): CompiledContract {
-  const newArgs: CtorArg[] = [
-    byteArrayArg(Array.from(hexToBytes(params.clientPubkey))),
-    byteArrayArg(Array.from(hexToBytes(params.facilitatorPubkey))),
-    intArg(params.timeout),
-    intArg(params.nonce),
-  ];
+  const ctorParamCount = config.compiledTemplate.ast.params.length;
+
+  let newArgs: CtorArg[];
+  if (ctorParamCount === 3) {
+    // v4-locked: facilitator is hardcoded in bytecode
+    newArgs = [
+      byteArrayArg(Array.from(hexToBytes(params.clientPubkey))),
+      intArg(params.timeout),
+      intArg(params.nonce),
+    ];
+  } else {
+    // v2 legacy: facilitator is a constructor param
+    newArgs = [
+      byteArrayArg(Array.from(hexToBytes(params.clientPubkey))),
+      byteArrayArg(Array.from(hexToBytes(params.facilitatorPubkey))),
+      intArg(params.timeout),
+      intArg(params.nonce),
+    ];
+  }
   return applyPatch(config.compiledTemplate, config.patchDescriptor, newArgs);
 }
 

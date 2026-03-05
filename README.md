@@ -36,9 +36,10 @@ You want to call a paid API. You install the `@x402/kaspa` client SDK. The SDK h
 
 The facilitator is the service that co-signs every settlement transaction. It validates that the covenant exists, the amounts are correct, then completes the 2-of-2 signature and broadcasts to the Kaspa network.
 
-- Runs: `@x402/kaspa-facilitator` server (hosted by KaspaCom, or self-hosted)
-- Earns: a configurable fee per settlement (e.g., 10,000 sompi = 0.0001 KAS per TX)
+- Runs: `@x402/kaspa-facilitator` server (hosted by KaspaCom)
+- Earns: accumulated fees swept periodically to a cold wallet
 - Provides: the trust layer -- neither client nor server can cheat
+- **Locked:** The facilitator pubkey is hardcoded in the covenant bytecode. Only KaspaCom can operate as facilitator.
 
 ```
 APP (consumer)                    API SERVER (seller)                FACILITATOR (KaspaCom)
@@ -89,30 +90,27 @@ Pricing reference (1 KAS = 100,000,000 sompi):
 | 0.1 KAS | 10,000,000 | Premium data |
 | 1 KAS | 100,000,000 | Heavy compute |
 
-### Facilitator Fee (Facilitator-as-Payee Model)
+### Payment & Fee Model
 
-The facilitator receives the **full payment** in the on-chain settle TX, then forwards `(payment - fee)` to the merchant as a separate standard wallet operation. This is the same model as Stripe and traditional payment processors.
+The facilitator receives the **full payment** in the on-chain settle TX, then **forwards the full amount to the merchant** as a separate standard wallet TX. Fees accumulate naturally at the facilitator address (miner fee change dust) and are **swept separately** to a cold wallet.
 
-```bash
-FACILITATOR_PRIVATE_KEY=<hex> \
-FACILITATOR_FEE=100000 \
-FACILITATOR_FEE_ADDRESS=kaspatest:qp... \
-  node packages/facilitator/dist/server.js
-```
+**Two separate flows:**
 
-**How it works:** If the API charges 0.01 KAS and the facilitator fee is 0.001 KAS:
-
+**1. Payment flow (per-settlement):**
 | Step | Recipient | Amount | Description |
 |------|-----------|--------|-------------|
-| Settle TX (on-chain) | Facilitator | 0.01 KAS | Full payment from covenant |
-| Settle TX (on-chain) | Covenant | remaining | Change back with nonce+1 |
-| Settle TX (on-chain) | Kaspa Miners | 0.00005 KAS | Miner fee (5000 sompi) |
-| Forward TX (wallet op) | API Developer | 0.009 KAS | Facilitator forwards to merchant |
-| Periodic sweep | Cold Wallet | accumulated | Facilitator sweeps fees |
+| Settle TX (covenant) | Facilitator | payment | Full payment from covenant |
+| Settle TX (covenant) | Covenant | remaining | Change back with nonce+1 |
+| Forward TX (wallet) | Merchant | payment | Facilitator forwards to merchant |
 
-**Why this model?** Kaspa's KIP-9 storage mass formula penalizes small outputs relative to inputs. Splitting a covenant output into 3+ destinations (merchant + fee + change) exceeds the storage mass limit for typical payment amounts. The 2-output model (facilitator + change) works reliably.
+**2. Fee sweep (periodic, separate):**
+| Step | Recipient | Amount | Description |
+|------|-----------|--------|-------------|
+| Sweep TX (wallet) | Cold Wallet | balance | Accumulated fees → cold wallet |
 
-The fee is advertised in the 402 response via `facilitatorFee` and `facilitatorAddress` fields so clients know the fee structure upfront.
+Sweep is triggered via `POST /sweep` on the facilitator server, or programmatically via `facilitator.sweepFees()`.
+
+**Why this model?** Kaspa's KIP-9 storage mass formula penalizes small outputs relative to inputs. Splitting a covenant output into 3+ destinations (merchant + fee + change) exceeds the storage mass limit for typical payment amounts. The 2-output model (facilitator + change) works reliably. Fees are swept when the accumulated balance is large enough to bypass KIP-9.
 
 ---
 
@@ -292,14 +290,14 @@ npx tsx test/e2e-full-flow.ts         # Full payment flow with facilitator fee m
 
 ## Covenant Contract
 
-**Production contract:** `contracts/silverscript/x402-channel-v2.sil`
+**Production contract:** `contracts/silverscript/x402-channel-v4-locked.sil`
 
 ```
-Constructor: (pubkey client, pubkey facilitator, int timeout, int nonce)
+Constructor: (pubkey client, int timeout, int nonce)
 Entrypoint:  settle(sig clientSig, sig facilitatorSig)
 ```
 
-Single-entrypoint (198 bytes). The covenant validates:
+Single-entrypoint (190 bytes). The facilitator pubkey is **hardcoded in the bytecode** (not a constructor parameter). The covenant validates:
 - Both client and facilitator signed (2-of-2 Schnorr)
 - Payment amount > 0
 - Payment + miner fee <= input value

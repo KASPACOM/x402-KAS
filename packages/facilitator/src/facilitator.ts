@@ -22,7 +22,7 @@ import type {
   CompiledContract,
   CovenantOutpoint,
 } from "@x402/kaspa-types";
-import { STANDARD_FEE, NETWORK_IDS } from "@x402/kaspa-types";
+import { STANDARD_FEE, NETWORK_IDS, KASPACOM_FACILITATOR_PUBKEY } from "@x402/kaspa-types";
 import {
   type ChannelConfig,
   type ChannelParams,
@@ -39,7 +39,7 @@ import {
   bytesToHex,
   type TemplatePatch,
 } from "@x402/kaspa-covenant";
-import { PrivateKey, type RpcClient } from "kaspa-wasm";
+import { PrivateKey, createTransactions, type RpcClient } from "kaspa-wasm";
 
 export interface FacilitatorConfig {
   /** Facilitator's private key (hex, 64 chars) */
@@ -72,6 +72,13 @@ export class KaspaFacilitator {
     this.config = config;
     const pk = new PrivateKey(config.privateKeyHex);
     this.facilitatorPubkey = pk.toPublicKey().toXOnlyPublicKey().toString();
+    if (this.facilitatorPubkey !== KASPACOM_FACILITATOR_PUBKEY) {
+      throw new Error(
+        `Facilitator key mismatch: derived pubkey ${this.facilitatorPubkey} does not match ` +
+        `hardcoded KaspaCom pubkey ${KASPACOM_FACILITATOR_PUBKEY}. ` +
+        `Use the correct FACILITATOR_PRIVATE_KEY from /root/.x402-facilitator-key.json`
+      );
+    }
     this.facilitatorSigningAddress = pk.toAddress(NETWORK_IDS[config.network]).toString();
     this.facilitatorFeeAddress = config.feeAddress ?? this.facilitatorSigningAddress;
     this.channelConfig = {
@@ -295,6 +302,22 @@ export class KaspaFacilitator {
       const minConf = this.config.minConfirmations ?? 10;
       const daaScore = await this.waitForConfirmation(minConf);
 
+      // 11. Forward full payment to merchant (separate standard TX)
+      //     Fees accumulate at facilitator address and are swept separately.
+      const merchantAddress = paymentRequirements.payTo;
+
+      let forwardTxId: string | undefined;
+      if (paymentAmount > STANDARD_FEE) {
+        try {
+          forwardTxId = await this.forwardToMerchant(merchantAddress, paymentAmount);
+          console.log(`[x402-facilitator] Forwarded ${paymentAmount} sompi → merchant (TX: ${forwardTxId})`);
+        } catch (fwdErr) {
+          const fwdMsg = fwdErr instanceof Error ? fwdErr.message : String(fwdErr);
+          console.error(`[x402-facilitator] Forward failed (settle succeeded): ${fwdMsg}`);
+          // Settlement succeeded even if forward fails — funds are safe at facilitator address
+        }
+      }
+
       return {
         success: true,
         transaction: result.transactionId,
@@ -306,6 +329,105 @@ export class KaspaFacilitator {
       const message = err instanceof Error ? err.message : String(err);
       return { success: false, errorReason: `Settlement error: ${message}` };
     }
+  }
+
+  // ----------------------------------------------------------
+  // Internal: Forward full payment to merchant
+  // ----------------------------------------------------------
+
+  /**
+   * After a successful settle, forward the full payment amount to the merchant.
+   * Single output, no fee splitting — fees accumulate at the facilitator address
+   * and are swept separately via sweepFees().
+   */
+  private async forwardToMerchant(
+    merchantAddress: string,
+    amount: bigint,
+  ): Promise<string> {
+    const rpc = await this.getRpc();
+    const networkId = NETWORK_IDS[this.config.network];
+
+    // Wait for the settle TX UTXO to appear at our signing address
+    let entries = await getAddressUtxos(rpc, this.facilitatorSigningAddress);
+    for (let attempt = 0; attempt < 15 && entries.length === 0; attempt++) {
+      await new Promise((r) => setTimeout(r, 2000));
+      entries = await getAddressUtxos(rpc, this.facilitatorSigningAddress);
+    }
+    if (entries.length === 0) {
+      throw new Error("No UTXOs at facilitator signing address for forwarding");
+    }
+
+    const outputs = [{ address: merchantAddress, amount }];
+    const privateKey = new PrivateKey(this.config.privateKeyHex);
+
+    const created = await createTransactions({
+      entries,
+      outputs,
+      changeAddress: this.facilitatorSigningAddress,
+      priorityFee: 0n,
+      networkId,
+    } as never);
+
+    let finalTxId = created.summary.finalTransactionId;
+    for (const pending of created.transactions) {
+      pending.sign([privateKey]);
+      finalTxId = await pending.submit(rpc);
+    }
+
+    if (!finalTxId) {
+      throw new Error("Forward transaction submission failed");
+    }
+
+    return finalTxId;
+  }
+
+  // ----------------------------------------------------------
+  // Public: Sweep accumulated fees to cold wallet
+  // ----------------------------------------------------------
+
+  /**
+   * Sends the entire facilitator balance to the cold wallet (feeAddress).
+   * Call this periodically (cron, manual, or after N settlements).
+   * Returns the TX ID, or null if there's nothing to sweep.
+   */
+  async sweepFees(): Promise<string | null> {
+    const rpc = await this.getRpc();
+    const networkId = NETWORK_IDS[this.config.network];
+
+    const entries = await getAddressUtxos(rpc, this.facilitatorSigningAddress);
+    if (entries.length === 0) return null;
+
+    let totalBalance = 0n;
+    for (const u of entries) totalBalance += u.amount;
+
+    // Need enough to cover miner fee (scale with input count)
+    const minerFee = BigInt(entries.length) * 10000n + 10000n;
+    const sweepAmount = totalBalance - minerFee;
+    if (sweepAmount <= 0n) return null;
+
+    const outputs = [{ address: this.facilitatorFeeAddress, amount: sweepAmount }];
+    const privateKey = new PrivateKey(this.config.privateKeyHex);
+
+    const created = await createTransactions({
+      entries,
+      outputs,
+      changeAddress: this.facilitatorSigningAddress,
+      priorityFee: 0n,
+      networkId,
+    } as never);
+
+    let finalTxId = created.summary.finalTransactionId;
+    for (const pending of created.transactions) {
+      pending.sign([privateKey]);
+      finalTxId = await pending.submit(rpc);
+    }
+
+    if (!finalTxId) {
+      throw new Error("Sweep transaction submission failed");
+    }
+
+    console.log(`[x402-facilitator] Swept ${sweepAmount} sompi → ${this.facilitatorFeeAddress} (TX: ${finalTxId})`);
+    return finalTxId;
   }
 
   // ----------------------------------------------------------
