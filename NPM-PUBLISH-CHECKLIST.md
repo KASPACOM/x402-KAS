@@ -159,12 +159,11 @@ GitHub Action that publishes on version tag push.
 ## Fee Flow (Production)
 
 ```
-Covenant → settle TX → facilitator address (qqze...)
-                            │
-                      forward TX (auto)
-                            │
-                    ├── merchant address (payment - fee)
-                    └── Sione's cold wallet (fee)
+Payment flow (per-settlement):
+  Covenant → settle TX → facilitator → forward TX → merchant (full amount)
+
+Fee sweep (periodic, separate):
+  Facilitator balance → POST /sweep → cold wallet
                         kaspatest:qp0ymkekjr2zhwqslug44vwy9f26pju7heh4xx8reddtql7nsmg5z6cldgd75
 ```
 

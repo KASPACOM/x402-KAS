@@ -1,7 +1,8 @@
 {
   "name": "@x402/kaspa-facilitator",
   "version": "0.1.0",
-  "description": "x402 Kaspa facilitator server — verify and settle covenant payments",
+  "private": true,
+  "description": "x402 Kaspa facilitator server — verify and settle covenant payments (KaspaCom internal)",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -11,6 +12,7 @@
       "import": "./dist/index.js"
     }
   },
+  "files": ["dist"],
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/server.ts",
@@ -23,5 +25,11 @@
     "@x402/kaspa-covenant": "workspace:*",
     "kaspa-wasm": "workspace:*"
   },
-  "license": "MIT"
+  "author": "KaspaCom",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KASPACOM/x402-KAS.git",
+    "directory": "packages/facilitator"
+  }
 }

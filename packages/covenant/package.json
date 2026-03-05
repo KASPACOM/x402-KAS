@@ -11,6 +11,7 @@
       "import": "./dist/index.js"
     }
   },
+  "files": ["dist", "README.md", "LICENSE"],
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist",
@@ -20,5 +21,12 @@
     "@x402/kaspa-types": "workspace:*",
     "kaspa-wasm": "workspace:*"
   },
-  "license": "MIT"
+  "author": "KaspaCom",
+  "license": "MIT",
+  "keywords": ["kaspa", "x402", "covenant", "smart-contract", "payment-channel"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KASPACOM/x402-KAS.git",
+    "directory": "packages/covenant"
+  }
 }

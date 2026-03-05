@@ -1,7 +1,7 @@
 {
   "name": "@x402/kaspa-server",
   "version": "0.1.0",
-  "description": "x402 Kaspa resource server middleware — gate content behind micropayments",
+  "description": "x402 Kaspa server middleware — gate HTTP endpoints behind Kaspa micropayments",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -11,6 +11,7 @@
       "import": "./dist/index.js"
     }
   },
+  "files": ["dist", "README.md", "LICENSE"],
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist",
@@ -19,5 +20,12 @@
   "dependencies": {
     "@x402/kaspa-types": "workspace:*"
   },
-  "license": "MIT"
+  "author": "KaspaCom",
+  "license": "MIT",
+  "keywords": ["kaspa", "x402", "micropayments", "http-402", "middleware", "express", "server"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KASPACOM/x402-KAS.git",
+    "directory": "packages/server"
+  }
 }

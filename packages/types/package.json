@@ -12,10 +12,18 @@
       "default": "./dist/index.js"
     }
   },
+  "files": ["dist", "README.md", "LICENSE"],
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit"
   },
-  "license": "MIT"
+  "author": "KaspaCom",
+  "license": "MIT",
+  "keywords": ["kaspa", "x402", "micropayments", "http-402", "payment-channel", "types"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KASPACOM/x402-KAS.git",
+    "directory": "packages/types"
+  }
 }
