@@ -1,14 +1,14 @@
-# @x402/kaspa-covenant
+# @kaspacom/x402-covenant
 
-Low-level covenant utilities for the x402 Kaspa payment protocol. Used internally by `@x402/kaspa`.
+Low-level covenant utilities for the x402 Kaspa payment protocol. Used internally by `@kaspacom/x402-kaspa`.
 
 ## Install
 
 ```bash
-npm install @x402/kaspa-covenant
+npm install @kaspacom/x402-covenant
 ```
 
-> **Note:** This is an internal package. Most users should use `@x402/kaspa` (client SDK) or `@x402/kaspa-server` (server middleware) instead.
+> **Note:** This is an internal package. Most users should use `@kaspacom/x402-kaspa` (client SDK) or `@kaspacom/x402-server` (server middleware) instead.
 
 ## What's Included
 

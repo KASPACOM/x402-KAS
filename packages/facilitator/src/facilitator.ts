@@ -2,7 +2,7 @@
  * Kaspa x402 Facilitator
  *
  * Handles verification and settlement of x402 covenant payments.
- * Uses @x402/kaspa-covenant for all on-chain operations.
+ * Uses @kaspacom/x402-covenant for all on-chain operations.
  *
  * The facilitator:
  * 1. Verifies covenant UTXO exists and matches expected structure
@@ -21,8 +21,8 @@ import type {
   KaspaNetwork,
   CompiledContract,
   CovenantOutpoint,
-} from "@x402/kaspa-types";
-import { STANDARD_FEE, NETWORK_IDS, KASPACOM_FACILITATOR_PUBKEY } from "@x402/kaspa-types";
+} from "@kaspacom/x402-types";
+import { STANDARD_FEE, NETWORK_IDS, KASPACOM_FACILITATOR_PUBKEY } from "@kaspacom/x402-types";
 import {
   type ChannelConfig,
   type ChannelParams,
@@ -38,8 +38,8 @@ import {
   hexToBytes,
   bytesToHex,
   type TemplatePatch,
-} from "@x402/kaspa-covenant";
-import { PrivateKey, createTransactions, type RpcClient } from "@x402/kaspa-wasm";
+} from "@kaspacom/x402-covenant";
+import { PrivateKey, createTransactions, type RpcClient } from "@kaspacom/x402-wasm";
 
 export interface FacilitatorConfig {
   /** Facilitator's private key (hex, 64 chars) */

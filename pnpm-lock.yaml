@@ -24,34 +24,34 @@ importers:
 
   packages/client:
     dependencies:
-      '@x402/kaspa-covenant':
+      '@kaspacom/x402-covenant':
         specifier: workspace:*
         version: link:../covenant
-      '@x402/kaspa-types':
+      '@kaspacom/x402-types':
         specifier: workspace:*
         version: link:../types
-      '@x402/kaspa-wasm':
+      '@kaspacom/x402-wasm':
         specifier: workspace:*
         version: link:../kaspa-wasm
 
   packages/covenant:
     dependencies:
-      '@x402/kaspa-types':
+      '@kaspacom/x402-types':
         specifier: workspace:*
         version: link:../types
-      '@x402/kaspa-wasm':
+      '@kaspacom/x402-wasm':
         specifier: workspace:*
         version: link:../kaspa-wasm
 
   packages/facilitator:
     dependencies:
-      '@x402/kaspa-covenant':
+      '@kaspacom/x402-covenant':
         specifier: workspace:*
         version: link:../covenant
-      '@x402/kaspa-types':
+      '@kaspacom/x402-types':
         specifier: workspace:*
         version: link:../types
-      '@x402/kaspa-wasm':
+      '@kaspacom/x402-wasm':
         specifier: workspace:*
         version: link:../kaspa-wasm
 
@@ -59,7 +59,7 @@ importers:
 
   packages/server:
     dependencies:
-      '@x402/kaspa-types':
+      '@kaspacom/x402-types':
         specifier: workspace:*
         version: link:../types
 

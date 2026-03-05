@@ -7,8 +7,8 @@
  *   Phase 2 (Facilitator): Deserialize → sign facilitator half → assemble sigscript → broadcast
  */
 
-import type { CompiledContract, CovenantOutpoint, SpendOutput } from "@x402/kaspa-types";
-import { STANDARD_FEE, KASPACOM_FACILITATOR_PUBKEY } from "@x402/kaspa-types";
+import type { CompiledContract, CovenantOutpoint, SpendOutput } from "@kaspacom/x402-types";
+import { STANDARD_FEE, KASPACOM_FACILITATOR_PUBKEY } from "@kaspacom/x402-types";
 import {
   buildSigScript,
   buildUnsignedCovenantTx,

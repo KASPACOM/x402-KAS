@@ -17,8 +17,8 @@ import type {
   CovenantOutpoint,
   ChannelInfo,
   CompiledContract,
-} from "@x402/kaspa-types";
-import { STANDARD_FEE, NETWORK_IDS, KASPACOM_FACILITATOR_PUBKEY } from "@x402/kaspa-types";
+} from "@kaspacom/x402-types";
+import { STANDARD_FEE, NETWORK_IDS, KASPACOM_FACILITATOR_PUBKEY } from "@kaspacom/x402-types";
 import {
   type ChannelConfig,
   type ChannelParams,
@@ -31,8 +31,8 @@ import {
   connectRpc,
   getAddressUtxos,
   getCovenantAddress,
-} from "@x402/kaspa-covenant";
-import { PrivateKey, type RpcClient } from "@x402/kaspa-wasm";
+} from "@kaspacom/x402-covenant";
+import { PrivateKey, type RpcClient } from "@kaspacom/x402-wasm";
 
 // ────────────────────────────────────────────────────────────────
 // Configuration

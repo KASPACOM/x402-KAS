@@ -1,5 +1,5 @@
 {
-  "name": "@x402/kaspa",
+  "name": "@kaspacom/x402-kaspa",
   "version": "0.1.0",
   "description": "x402 Kaspa client SDK — automatic HTTP 402 payments on Kaspa L1",
   "type": "module",
@@ -18,9 +18,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@x402/kaspa-types": "workspace:*",
-    "@x402/kaspa-covenant": "workspace:*",
-    "@x402/kaspa-wasm": "workspace:*"
+    "@kaspacom/x402-types": "workspace:*",
+    "@kaspacom/x402-covenant": "workspace:*",
+    "@kaspacom/x402-wasm": "workspace:*"
   },
   "author": "KaspaCom",
   "license": "MIT",

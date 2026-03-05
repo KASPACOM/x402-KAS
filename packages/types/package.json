@@ -1,5 +1,5 @@
 {
-  "name": "@x402/kaspa-types",
+  "name": "@kaspacom/x402-types",
   "version": "0.1.0",
   "description": "Type definitions for x402 Kaspa payment protocol",
   "type": "module",

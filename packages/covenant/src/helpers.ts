@@ -20,8 +20,8 @@ import {
   type ITransactionInput,
   type ITransactionOutput,
   type UtxoEntryReference,
-} from "@x402/kaspa-wasm";
-import type { CompiledContract, CovenantOutpoint, SpendOutput } from "@x402/kaspa-types";
+} from "@kaspacom/x402-wasm";
+import type { CompiledContract, CovenantOutpoint, SpendOutput } from "@kaspacom/x402-types";
 
 export const SUBNETWORK_ID_NATIVE = "0000000000000000000000000000000000000000";
 

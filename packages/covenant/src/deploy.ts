@@ -3,7 +3,7 @@
  * Adapted from @kaspacom/covenant-sdk.
  */
 
-import type { CompiledContract, CovenantOutpoint } from "@x402/kaspa-types";
+import type { CompiledContract, CovenantOutpoint } from "@kaspacom/x402-types";
 import {
   connectRpc,
   getAddressUtxos,

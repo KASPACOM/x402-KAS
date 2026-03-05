@@ -59,7 +59,7 @@ Our `kascov-cli.ts` module:
 5. Cleans up temp files
 
 ```typescript
-import { kascovDeploy, kascovSpendSigned } from "@x402/kaspa-covenant";
+import { kascovDeploy, kascovSpendSigned } from "@kaspacom/x402-covenant";
 
 // Deploy a covenant
 const result = await kascovDeploy(compiledContract, 500_000_000n, privateKeyHex);

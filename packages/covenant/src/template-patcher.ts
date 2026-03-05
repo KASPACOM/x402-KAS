@@ -7,8 +7,8 @@
  * with new values. This produces byte-identical output to a fresh compile.
  */
 
-import { Address, XOnlyPublicKey } from "@x402/kaspa-wasm";
-import type { CompiledContract } from "@x402/kaspa-types";
+import { Address, XOnlyPublicKey } from "@kaspacom/x402-wasm";
+import type { CompiledContract } from "@kaspacom/x402-types";
 
 export type CtorArg =
   | { kind: "array"; data: { kind: "byte"; data: number }[] }

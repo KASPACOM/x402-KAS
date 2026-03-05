@@ -1,16 +1,16 @@
 # x402-KAS — NPM Publish Checklist
 
-> Goal: Publish `@x402/kaspa`, `@x402/kaspa-server`, and `@x402/kaspa-types` to npm.
+> Goal: Publish `@kaspacom/x402-kaspa`, `@kaspacom/x402-server`, and `@kaspacom/x402-types` to npm.
 > The facilitator package stays private (KaspaCom runs it as a hosted service).
 
 ## Packages to Publish
 
 | Package | npm Name | Who Uses It |
 |---------|----------|-------------|
-| `packages/types/` | `@x402/kaspa-types` | Everyone (auto-installed) |
-| `packages/covenant/` | `@x402/kaspa-covenant` | Internal dep of @x402/kaspa |
-| `packages/client/` | `@x402/kaspa` | App developers (buyers) |
-| `packages/server/` | `@x402/kaspa-server` | API developers (sellers) |
+| `packages/types/` | `@kaspacom/x402-types` | Everyone (auto-installed) |
+| `packages/covenant/` | `@kaspacom/x402-covenant` | Internal dep of @kaspacom/x402-kaspa |
+| `packages/client/` | `@kaspacom/x402-kaspa` | App developers (buyers) |
+| `packages/server/` | `@kaspacom/x402-server` | API developers (sellers) |
 | `packages/kaspa-wasm/` | `kaspa-wasm` | Internal dep (WASM runtime) |
 
 ## Packages NOT Published (Private)
@@ -29,9 +29,9 @@ Replace with real versions before `npm publish`.
 
 **Files to update:**
 - `packages/types/package.json` — no deps (ok)
-- `packages/covenant/package.json` — `@x402/kaspa-types` → `^0.1.0`, `kaspa-wasm` → `^1.1.0`
-- `packages/client/package.json` — `@x402/kaspa-types` → `^0.1.0`, `@x402/kaspa-covenant` → `^0.1.0`, `kaspa-wasm` → `^1.1.0`
-- `packages/server/package.json` — `@x402/kaspa-types` → `^0.1.0`
+- `packages/covenant/package.json` — `@kaspacom/x402-types` → `^0.1.0`, `kaspa-wasm` → `^1.1.0`
+- `packages/client/package.json` — `@kaspacom/x402-types` → `^0.1.0`, `@kaspacom/x402-covenant` → `^0.1.0`, `kaspa-wasm` → `^1.1.0`
+- `packages/server/package.json` — `@kaspacom/x402-types` → `^0.1.0`
 - `packages/facilitator/package.json` — not published, but fix anyway
 
 ### 2. Add `"files"` field to each package.json
@@ -45,25 +45,25 @@ Without this, source code and build artifacts get published.
 
 ### 3. Publish kaspa-wasm to npm
 The WASM package is self-compiled from rusty-kaspa TN12 branch.
-Must be published as `kaspa-wasm` (or `@x402/kaspa-wasm`) so other packages can depend on it.
+Must be published as `kaspa-wasm` (or `@kaspacom/x402-wasm`) so other packages can depend on it.
 
 **Size warning:** ~12MB WASM binary. This is normal for Kaspa WASM builds.
 
 ### 4. Decide kaspa-wasm package name
 Currently vendored at `packages/kaspa-wasm/`. Choose one:
 - `kaspa-wasm` — generic (may conflict with upstream)
-- `@x402/kaspa-wasm` — scoped under x402 (safer)
-- `@kaspacom/kaspa-wasm` — scoped under KaspaCom org
+- `@kaspacom/x402-wasm` — scoped under x402 (safer)
+- `@kaspacom/x402-wasm` — scoped under KaspaCom org
 
 Update all imports across packages to match.
 
 ### 5. Publish order (dependencies first)
 ```
-1. kaspa-wasm (or @x402/kaspa-wasm)
-2. @x402/kaspa-types
-3. @x402/kaspa-covenant
-4. @x402/kaspa
-5. @x402/kaspa-server
+1. kaspa-wasm (or @kaspacom/x402-wasm)
+2. @kaspacom/x402-types
+3. @kaspacom/x402-covenant
+4. @kaspacom/x402-kaspa
+5. @kaspacom/x402-server
 ```
 
 ---
@@ -75,26 +75,26 @@ MIT license. Copy to root + each package directory.
 
 ### 7. Create README.md for each public package
 
-**@x402/kaspa-types README:**
+**@kaspacom/x402-types README:**
 - What types are exported
 - Link to main repo
 
-**@x402/kaspa README (client SDK):**
-- `npm install @x402/kaspa`
+**@kaspacom/x402-kaspa README (client SDK):**
+- `npm install @kaspacom/x402-kaspa`
 - Quick start: `new X402Client(config)` → `client.fetch(url)`
 - Configuration options
 - How channels work
 - Link to main repo
 
-**@x402/kaspa-server README (middleware):**
-- `npm install @x402/kaspa-server`
+**@kaspacom/x402-server README (middleware):**
+- `npm install @kaspacom/x402-server`
 - Quick start: `app.use(paywall({ ... }))`
 - Configuration options (price, payTo, facilitatorUrl)
 - Express example
 - Link to main repo
 
-**@x402/kaspa-covenant README:**
-- Internal package used by @x402/kaspa
+**@kaspacom/x402-covenant README:**
+- Internal package used by @kaspacom/x402-kaspa
 - Not meant for direct use
 - API reference for advanced users
 

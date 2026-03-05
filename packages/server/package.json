@@ -1,5 +1,5 @@
 {
-  "name": "@x402/kaspa-server",
+  "name": "@kaspacom/x402-server",
   "version": "0.1.0",
   "description": "x402 Kaspa server middleware — gate HTTP endpoints behind Kaspa micropayments",
   "type": "module",
@@ -18,7 +18,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@x402/kaspa-types": "workspace:*"
+    "@kaspacom/x402-types": "workspace:*"
   },
   "author": "KaspaCom",
   "license": "MIT",

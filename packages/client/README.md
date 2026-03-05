@@ -1,17 +1,17 @@
-# @x402/kaspa
+# @kaspacom/x402-kaspa
 
 Client SDK for the x402 Kaspa payment protocol. Automatically handles HTTP 402 payments on Kaspa L1.
 
 ## Install
 
 ```bash
-npm install @x402/kaspa
+npm install @kaspacom/x402-kaspa
 ```
 
 ## Quick Start
 
 ```typescript
-import { X402Client } from "@x402/kaspa";
+import { X402Client } from "@kaspacom/x402-kaspa";
 
 const client = new X402Client({
   privateKeyHex: "<your-64-char-hex-key>",

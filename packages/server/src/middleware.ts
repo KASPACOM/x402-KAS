@@ -20,7 +20,7 @@ import type {
   ResourceInfo,
   KaspaNetwork,
   KaspaExtra,
-} from "@x402/kaspa-types";
+} from "@kaspacom/x402-types";
 
 // ------------------------------------------------------------
 // Configuration
@@ -233,7 +233,7 @@ export async function processPayment(
  *
  * Usage:
  * ```ts
- * import { paywall } from "@x402/kaspa-server";
+ * import { paywall } from "@kaspacom/x402-server";
  *
  * app.use(paywall({
  *   routes: [{

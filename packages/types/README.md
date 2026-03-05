@@ -1,11 +1,11 @@
-# @x402/kaspa-types
+# @kaspacom/x402-types
 
 Shared TypeScript type definitions and constants for the x402 Kaspa payment protocol.
 
 ## Install
 
 ```bash
-npm install @x402/kaspa-types
+npm install @kaspacom/x402-types
 ```
 
 ## What's Included
@@ -20,8 +20,8 @@ npm install @x402/kaspa-types
 ## Usage
 
 ```typescript
-import { STANDARD_FEE, KASPACOM_FACILITATOR_PUBKEY } from "@x402/kaspa-types";
-import type { PaymentPayload, PaymentRequirements } from "@x402/kaspa-types";
+import { STANDARD_FEE, KASPACOM_FACILITATOR_PUBKEY } from "@kaspacom/x402-types";
+import type { PaymentPayload, PaymentRequirements } from "@kaspacom/x402-types";
 ```
 
 ## Links

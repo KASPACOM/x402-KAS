@@ -7,7 +7,7 @@ import type {
   PaymentPayload,
   PaymentRequirements,
   SettlementResponse,
-} from "@x402/kaspa-types";
+} from "@kaspacom/x402-types";
 
 /** Parse a PAYMENT-REQUIRED header (base64 JSON). */
 export function parsePaymentRequired(headerValue: string): PaymentRequired {

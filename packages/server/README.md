@@ -1,17 +1,17 @@
-# @x402/kaspa-server
+# @kaspacom/x402-server
 
 Server middleware for the x402 Kaspa payment protocol. Gate any HTTP endpoint behind Kaspa micropayments.
 
 ## Install
 
 ```bash
-npm install @x402/kaspa-server
+npm install @kaspacom/x402-server
 ```
 
 ## Quick Start
 
 ```typescript
-import { paywall, buildPaymentRequired } from "@x402/kaspa-server";
+import { paywall, buildPaymentRequired } from "@kaspacom/x402-server";
 
 // Express example
 app.get("/weather", (req, res) => {

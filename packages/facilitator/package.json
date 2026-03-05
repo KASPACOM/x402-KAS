@@ -1,5 +1,5 @@
 {
-  "name": "@x402/kaspa-facilitator",
+  "name": "@kaspacom/x402-facilitator",
   "version": "0.1.0",
   "private": true,
   "description": "x402 Kaspa facilitator server — verify and settle covenant payments (KaspaCom internal)",
@@ -21,9 +21,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@x402/kaspa-types": "workspace:*",
-    "@x402/kaspa-covenant": "workspace:*",
-    "@x402/kaspa-wasm": "workspace:*"
+    "@kaspacom/x402-types": "workspace:*",
+    "@kaspacom/x402-covenant": "workspace:*",
+    "@kaspacom/x402-wasm": "workspace:*"
   },
   "author": "KaspaCom",
   "license": "MIT",

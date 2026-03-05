@@ -1,5 +1,5 @@
 {
-  "name": "@x402/kaspa-covenant",
+  "name": "@kaspacom/x402-covenant",
   "version": "0.1.0",
   "description": "Covenant utilities for x402 Kaspa — deploy, sign, settle payment channels",
   "type": "module",
@@ -18,8 +18,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@x402/kaspa-types": "workspace:*",
-    "@x402/kaspa-wasm": "workspace:*"
+    "@kaspacom/x402-types": "workspace:*",
+    "@kaspacom/x402-wasm": "workspace:*"
   },
   "author": "KaspaCom",
   "license": "MIT",

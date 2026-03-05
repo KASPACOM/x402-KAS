@@ -17,8 +17,8 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { readFileSync } from "node:fs";
 import { KaspaFacilitator, type FacilitatorConfig } from "./facilitator.js";
-import { extractPatchDescriptor } from "@x402/kaspa-covenant";
-import type { VerifyRequest, SettleRequest, KaspaNetwork, CompiledContract } from "@x402/kaspa-types";
+import { extractPatchDescriptor } from "@kaspacom/x402-covenant";
+import type { VerifyRequest, SettleRequest, KaspaNetwork, CompiledContract } from "@kaspacom/x402-types";
 
 function readBody(req: IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {

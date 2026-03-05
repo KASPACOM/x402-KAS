@@ -18,17 +18,17 @@ x402-kaspa lets any HTTP API accept Kaspa payments per-request. When someone cal
 
 ### API Developer (sells access)
 
-You have an API and want to charge per request. You install the `@x402/kaspa-server` middleware and set a price. That's it.
+You have an API and want to charge per request. You install the `@kaspacom/x402-server` middleware and set a price. That's it.
 
-- Installs: `@x402/kaspa-server` npm package
+- Installs: `@kaspacom/x402-server` npm package
 - Configures: price per endpoint, their Kaspa address to receive payments, facilitator URL
 - Gets: KAS deposited to their address for every paid request
 
 ### App Developer / Consumer (buys access)
 
-You want to call a paid API. You install the `@x402/kaspa` client SDK. The SDK handles channel opening, payment signing, and retries automatically.
+You want to call a paid API. You install the `@kaspacom/x402-kaspa` client SDK. The SDK handles channel opening, payment signing, and retries automatically.
 
-- Installs: `@x402/kaspa` npm package
+- Installs: `@kaspacom/x402-kaspa` npm package
 - Configures: their private key, Kaspa RPC URL
 - Funds: their Kaspa wallet with KAS (the SDK deploys a channel on first use)
 
@@ -36,7 +36,7 @@ You want to call a paid API. You install the `@x402/kaspa` client SDK. The SDK h
 
 The facilitator is the service that co-signs every settlement transaction. It validates that the covenant exists, the amounts are correct, then completes the 2-of-2 signature and broadcasts to the Kaspa network.
 
-- Runs: `@x402/kaspa-facilitator` server (hosted by KaspaCom)
+- Runs: `@kaspacom/x402-facilitator` server (hosted by KaspaCom)
 - Earns: accumulated fees swept periodically to a cold wallet
 - Provides: the trust layer -- neither client nor server can cheat
 - **Locked:** The facilitator pubkey is hardcoded in the covenant bytecode. Only KaspaCom can operate as facilitator.
@@ -118,11 +118,11 @@ Sweep is triggered via `POST /sweep` on the facilitator server, or programmatica
 
 | Package | npm | Description |
 |---------|-----|-------------|
-| `@x402/kaspa-types` | `packages/types/` | Shared types and constants |
-| `@x402/kaspa-covenant` | `packages/covenant/` | Core covenant: deploy, settle, refund |
-| `@x402/kaspa-facilitator` | `packages/facilitator/` | Facilitator HTTP server |
-| `@x402/kaspa` | `packages/client/` | Client SDK: channels, payments, 402 auto-retry |
-| `@x402/kaspa-server` | `packages/server/` | API server middleware (Express, etc.) |
+| `@kaspacom/x402-types` | `packages/types/` | Shared types and constants |
+| `@kaspacom/x402-covenant` | `packages/covenant/` | Core covenant: deploy, settle, refund |
+| `@kaspacom/x402-facilitator` | `packages/facilitator/` | Facilitator HTTP server |
+| `@kaspacom/x402-kaspa` | `packages/client/` | Client SDK: channels, payments, 402 auto-retry |
+| `@kaspacom/x402-server` | `packages/server/` | API server middleware (Express, etc.) |
 | `kaspa-wasm` | `packages/kaspa-wasm/` | Kaspa WASM SDK (TN12 build) |
 
 ## Prerequisites
