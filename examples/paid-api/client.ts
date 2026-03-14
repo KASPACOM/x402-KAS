@@ -19,6 +19,8 @@ import { fileURLToPath } from "node:url";
 import { X402Client } from "../../packages/client/dist/index.js";
 import { extractPatchDescriptor } from "../../packages/covenant/dist/index.js";
 import type { KaspaNetwork, CompiledContract, PaymentRequired } from "../../packages/types/dist/index.js";
+import { w3cwebsocket } from "websocket";
+globalThis.WebSocket = w3cwebsocket as any;
 
 const API_URL = process.env.API_URL ?? "http://localhost:3000";
 const NETWORK = (process.env.KASPA_NETWORK ?? "kaspa:testnet-12") as KaspaNetwork;

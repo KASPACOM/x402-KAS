@@ -20,6 +20,8 @@ import { fileURLToPath } from "node:url";
 import { KaspaFacilitator, type FacilitatorConfig } from "./facilitator.js";
 import { extractPatchDescriptor } from "@kaspacom/x402-covenant";
 import type { VerifyRequest, SettleRequest, KaspaNetwork, CompiledContract } from "@kaspacom/x402-types";
+import { w3cwebsocket } from "websocket";
+globalThis.WebSocket = w3cwebsocket as any;
 
 function readBody(req: IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
