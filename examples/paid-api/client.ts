@@ -35,9 +35,9 @@ if (!PRIVATE_KEY) {
 
 // Load compiled covenant template
 const contractPath = process.env.COMPILED_CONTRACT_PATH
-  ?? fileURLToPath(new URL("../../contracts/compiled/x402-channel.json", import.meta.url));
+  ?? fileURLToPath(new URL("../../contracts/compiled/x402-channel-v4-locked.json", import.meta.url));
 const ctorPath = process.env.CTOR_ARGS_PATH
-  ?? fileURLToPath(new URL("../../contracts/silverscript/x402-channel-ctor.json", import.meta.url));
+  ?? fileURLToPath(new URL("../../contracts/silverscript/x402-channel-v4-locked-ctor.json", import.meta.url));
 
 const compiledTemplate: CompiledContract = JSON.parse(readFileSync(contractPath, "utf-8"));
 const ctorArgs = JSON.parse(readFileSync(ctorPath, "utf-8"));
