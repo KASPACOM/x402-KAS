@@ -40,20 +40,22 @@ let FACILITATOR_FEE: string | undefined;
 let FACILITATOR_FEE_ADDRESS: string | undefined;
 let FACILITATOR_SIGNING_ADDRESS: string | undefined;
 
-try {
-  const healthRes = await fetch(`${FACILITATOR_URL}/health`);
-  if (healthRes.ok) {
-    const health = await healthRes.json() as { feeSompi?: string; feeAddress?: string; signingAddress?: string };
-    FACILITATOR_FEE = health.feeSompi && health.feeSompi !== "0" ? health.feeSompi : undefined;
-    FACILITATOR_FEE_ADDRESS = health.feeAddress;
-    FACILITATOR_SIGNING_ADDRESS = health.signingAddress;
-    console.log(`[paid-api] Facilitator signing: ${FACILITATOR_SIGNING_ADDRESS ?? "N/A"}`);
-    console.log(`[paid-api] Facilitator fee: ${FACILITATOR_FEE ?? "0"} sompi`);
-    console.log(`[paid-api] Facilitator fee address: ${FACILITATOR_FEE_ADDRESS ?? "N/A"}`);
+(async () => {
+  try {
+    const healthRes = await fetch(`${FACILITATOR_URL}/health`);
+    if (healthRes.ok) {
+      const health = await healthRes.json() as { feeSompi?: string; feeAddress?: string; signingAddress?: string };
+      FACILITATOR_FEE = health.feeSompi && health.feeSompi !== "0" ? health.feeSompi : undefined;
+      FACILITATOR_FEE_ADDRESS = health.feeAddress;
+      FACILITATOR_SIGNING_ADDRESS = health.signingAddress;
+      console.log(`[paid-api] Facilitator signing: ${FACILITATOR_SIGNING_ADDRESS ?? "N/A"}`);
+      console.log(`[paid-api] Facilitator fee: ${FACILITATOR_FEE ?? "0"} sompi`);
+      console.log(`[paid-api] Facilitator fee address: ${FACILITATOR_FEE_ADDRESS ?? "N/A"}`);
+    }
+  } catch {
+    console.warn(`[paid-api] Could not fetch facilitator health from ${FACILITATOR_URL}/health`);
   }
-} catch {
-  console.warn(`[paid-api] Could not fetch facilitator health from ${FACILITATOR_URL}/health`);
-}
+})();
 
 const facilitatorClient = new HttpFacilitatorClient();
 
