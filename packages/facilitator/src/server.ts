@@ -16,6 +16,7 @@
 
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { KaspaFacilitator, type FacilitatorConfig } from "./facilitator.js";
 import { extractPatchDescriptor } from "@kaspacom/x402-covenant";
 import type { VerifyRequest, SettleRequest, KaspaNetwork, CompiledContract } from "@kaspacom/x402-types";
@@ -140,7 +141,7 @@ if (isMain) {
 
   // Load compiled covenant template
   const contractPath = process.env.COMPILED_CONTRACT_PATH
-    ?? new URL("../../../contracts/compiled/x402-channel-v4-locked.json", import.meta.url).pathname;
+    ?? fileURLToPath(new URL("../../../contracts/compiled/x402-channel-v4-locked.json", import.meta.url));
   let compiledTemplate: CompiledContract;
   try {
     compiledTemplate = JSON.parse(readFileSync(contractPath, "utf-8"));
@@ -152,7 +153,7 @@ if (isMain) {
 
   // Load constructor args template for patch descriptor
   const ctorPath = process.env.CTOR_ARGS_PATH
-    ?? new URL("../../../contracts/silverscript/x402-channel-v4-locked-ctor.json", import.meta.url).pathname;
+    ?? fileURLToPath(new URL("../../../contracts/silverscript/x402-channel-v4-locked-ctor.json", import.meta.url));
   let ctorArgs: unknown;
   try {
     ctorArgs = JSON.parse(readFileSync(ctorPath, "utf-8"));

@@ -15,6 +15,7 @@
  */
 
 import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { X402Client } from "../../packages/client/dist/index.js";
 import { extractPatchDescriptor } from "../../packages/covenant/dist/index.js";
 import type { KaspaNetwork, CompiledContract, PaymentRequired } from "../../packages/types/dist/index.js";
@@ -32,9 +33,9 @@ if (!PRIVATE_KEY) {
 
 // Load compiled covenant template
 const contractPath = process.env.COMPILED_CONTRACT_PATH
-  ?? new URL("../../contracts/compiled/x402-channel.json", import.meta.url).pathname;
+  ?? fileURLToPath(new URL("../../contracts/compiled/x402-channel.json", import.meta.url));
 const ctorPath = process.env.CTOR_ARGS_PATH
-  ?? new URL("../../contracts/silverscript/x402-channel-ctor.json", import.meta.url).pathname;
+  ?? fileURLToPath(new URL("../../contracts/silverscript/x402-channel-ctor.json", import.meta.url));
 
 const compiledTemplate: CompiledContract = JSON.parse(readFileSync(contractPath, "utf-8"));
 const ctorArgs = JSON.parse(readFileSync(ctorPath, "utf-8"));
