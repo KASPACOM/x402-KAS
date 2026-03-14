@@ -72,13 +72,6 @@ export class KaspaFacilitator {
     this.config = config;
     const pk = new PrivateKey(config.privateKeyHex);
     this.facilitatorPubkey = pk.toPublicKey().toXOnlyPublicKey().toString();
-    if (process.env.IS_DEV !== "true" && this.facilitatorPubkey !== KASPACOM_FACILITATOR_PUBKEY) {
-      throw new Error(
-        `Facilitator key mismatch: derived pubkey ${this.facilitatorPubkey} does not match ` +
-        `hardcoded KaspaCom pubkey ${KASPACOM_FACILITATOR_PUBKEY}. ` +
-        `Use the correct FACILITATOR_PRIVATE_KEY from /root/.x402-facilitator-key.json ` +
-        `or set IS_DEV="true" to ignore this check.`);
-    }
     this.facilitatorSigningAddress = pk.toAddress(NETWORK_IDS[config.network]).toString();
     this.facilitatorFeeAddress = config.feeAddress ?? this.facilitatorSigningAddress;
     this.channelConfig = {

@@ -21,7 +21,8 @@ app.get("/weather", (req, res) => {
     amount: "1000000",                    // 0.01 KAS
     payTo: "kaspa:qz...",                 // Your Kaspa address
     network: "kaspa:testnet-12",
-    facilitatorUrl: "https://x402.kaspacom.com",
+    facilitatorUrl: "http://localhost:4020",   // Your facilitator or KaspaCom
+    facilitatorPubkey: "<facilitator-pubkey>", // From facilitator /health endpoint
   });
   res.status(402).json(pr);
 });
@@ -34,7 +35,8 @@ app.get("/weather", (req, res) => {
 | `amount` | Price in sompi (string). 1 KAS = 100,000,000 sompi |
 | `payTo` | Your Kaspa address to receive payments |
 | `network` | CAIP-2 network (`kaspa:mainnet`, `kaspa:testnet-12`) |
-| `facilitatorUrl` | KaspaCom facilitator endpoint |
+| `facilitatorUrl` | Facilitator endpoint (self-hosted or KaspaCom) |
+| `facilitatorPubkey` | Facilitator's x-only public key (from `/health` endpoint) |
 
 ## Pricing Reference
 

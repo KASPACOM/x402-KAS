@@ -14,7 +14,9 @@ npm install @kaspacom/x402-types
 - `VerifyRequest`, `VerifyResponse`, `SettleRequest`, `SettlementResponse` — facilitator API types
 - `CompiledContract`, `SpendOutput`, `CovenantOutpoint` — covenant types
 - `STANDARD_FEE`, `SOMPI_PER_KAS` — constants
-- `KASPACOM_FACILITATOR_PUBKEY` — hardcoded facilitator public key
+- `KASPACOM_FACILITATOR_PUBKEY` — KaspaCom's default facilitator public key
+- `X402_CHANNEL_ABI` — v3 contract ABI (configurable facilitator)
+- `X402_CHANNEL_V4_LOCKED_ABI` — v4-locked contract ABI (hardcoded facilitator)
 - `KaspaNetwork`, `NETWORK_IDS` — network identifiers
 
 ## Usage

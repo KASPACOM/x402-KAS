@@ -143,7 +143,7 @@ if (isMain) {
 
   // Load compiled covenant template
   const contractPath = process.env.COMPILED_CONTRACT_PATH
-    ?? fileURLToPath(new URL("../../../contracts/compiled/x402-channel-v4-locked.json", import.meta.url));
+    ?? fileURLToPath(new URL("../../../contracts/compiled/x402-channel-v3.json", import.meta.url));
   let compiledTemplate: CompiledContract;
   try {
     compiledTemplate = JSON.parse(readFileSync(contractPath, "utf-8"));
@@ -155,7 +155,7 @@ if (isMain) {
 
   // Load constructor args template for patch descriptor
   const ctorPath = process.env.CTOR_ARGS_PATH
-    ?? fileURLToPath(new URL("../../../contracts/silverscript/x402-channel-v4-locked-ctor.json", import.meta.url));
+    ?? fileURLToPath(new URL("../../../contracts/silverscript/x402-channel-ctor.json", import.meta.url));
   let ctorArgs: unknown;
   try {
     ctorArgs = JSON.parse(readFileSync(ctorPath, "utf-8"));

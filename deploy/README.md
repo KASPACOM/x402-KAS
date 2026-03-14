@@ -51,9 +51,17 @@ GET /health → { status, network, pubkey, signingAddress, feeAddress }
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `FACILITATOR_PRIVATE_KEY` | yes | — | 64-char hex private key |
+| `FACILITATOR_PRIVATE_KEY` | yes | — | 64-char hex private key (any key works with v3 contract) |
 | `FACILITATOR_FEE_ADDRESS` | no | signing address | Cold wallet for fee sweeps |
+| `COMPILED_CONTRACT_PATH` | no | v3 contract | Path to compiled covenant JSON |
+| `CTOR_ARGS_PATH` | no | v3 ctor | Path to constructor args JSON |
 | `KASPA_RPC` | no | `ws://tn12-node.kaspa.com:17210` | Kaspa wRPC node |
 | `KASPA_NETWORK` | no | `kaspa:testnet-12` | CAIP-2 network ID |
 | `PORT` | no | `4020` | Listen port |
 | `MIN_CONFIRMATIONS` | no | `10` | DAA score confirmations |
+
+For KaspaCom production (v4-locked contract), set:
+```bash
+COMPILED_CONTRACT_PATH=./contracts/compiled/x402-channel-v4-locked.json
+CTOR_ARGS_PATH=./contracts/silverscript/x402-channel-v4-locked-ctor.json
+```

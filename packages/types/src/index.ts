@@ -217,9 +217,10 @@ export const SOMPI_PER_KAS = 100_000_000n;
 export const STANDARD_FEE = 5000n;
 
 /**
- * KaspaCom's official facilitator x-only public key (hardcoded in covenant bytecode).
- * To rotate: generate new keypair, update this constant, recompile x402-channel-v4-locked.sil,
- * and store the new private key in /root/.x402-facilitator-key.json.
+ * KaspaCom's official facilitator x-only public key.
+ * Used as default when no facilitator pubkey is specified.
+ * In the v4-locked production contract, this is hardcoded in covenant bytecode.
+ * In the v3 contract, this is passed as a constructor parameter (configurable).
  */
 export const KASPACOM_FACILITATOR_PUBKEY = "25d0720065a2eebebb85fbfb6d8dab952fa7c3cafdb0f6166953b0dfc9bd8dc3";
 
@@ -240,14 +241,36 @@ export const SUBNETWORK_ID_NATIVE = "0000000000000000000000000000000000000000";
 // X402Channel Covenant ABI
 // ------------------------------------------------------------
 
+/** ABI for v3 contract (facilitator as constructor param — configurable) */
 export const X402_CHANNEL_ABI = {
+  contractName: "X402Channel",
+  constructorParams: [
+    { name: "client", type: "pubkey" },
+    { name: "facilitator", type: "pubkey" },
+    { name: "timeout", type: "int" },
+    { name: "nonce", type: "int" },
+  ],
+  entrypoints: [
+    {
+      name: "settle",
+      selector: 0,
+      inputs: [
+        { name: "clientSig", type: "sig" },
+        { name: "facilitatorSig", type: "sig" },
+      ],
+      sigOpCount: 2,
+    },
+  ],
+} as const;
+
+/** ABI for v4-locked contract (facilitator hardcoded in bytecode — production) */
+export const X402_CHANNEL_V4_LOCKED_ABI = {
   contractName: "X402Channel",
   constructorParams: [
     { name: "client", type: "pubkey" },
     { name: "timeout", type: "int" },
     { name: "nonce", type: "int" },
   ],
-  /** Facilitator pubkey is hardcoded in covenant bytecode (not a constructor param) */
   hardcodedFacilitator: KASPACOM_FACILITATOR_PUBKEY,
   entrypoints: [
     {

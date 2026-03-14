@@ -36,10 +36,11 @@ You want to call a paid API. You install the `@kaspacom/x402-kaspa` client SDK. 
 
 The facilitator is the service that co-signs every settlement transaction. It validates that the covenant exists, the amounts are correct, then completes the 2-of-2 signature and broadcasts to the Kaspa network.
 
-- Runs: `@kaspacom/x402-facilitator` server (hosted by KaspaCom)
+- Runs: `@kaspacom/x402-facilitator` server (hosted by KaspaCom, or self-hosted for testing)
 - Earns: accumulated fees swept periodically to a cold wallet
 - Provides: the trust layer -- neither client nor server can cheat
-- **Locked:** The facilitator pubkey is hardcoded in the covenant bytecode. Only KaspaCom can operate as facilitator.
+- **Production (v4-locked):** The facilitator pubkey is hardcoded in covenant bytecode. Only KaspaCom can operate.
+- **Development (v3):** The facilitator pubkey is a constructor parameter. Anyone can run their own facilitator for testing.
 
 ```
 APP (consumer)                    API SERVER (seller)                FACILITATOR (KaspaCom)
@@ -154,11 +155,22 @@ FACILITATOR_FEE=100000 \
   node packages/facilitator/dist/server.js
 ```
 
+The facilitator defaults to the v3 contract (configurable facilitator key). To use the production v4-locked contract, set:
+
+```bash
+COMPILED_CONTRACT_PATH=./contracts/compiled/x402-channel-v4-locked.json \
+CTOR_ARGS_PATH=./contracts/silverscript/x402-channel-v4-locked-ctor.json \
+FACILITATOR_PRIVATE_KEY=<kaspacom-key> \
+  node packages/facilitator/dist/server.js
+```
+
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `FACILITATOR_PRIVATE_KEY` | *required* | 64-char hex private key |
 | `FACILITATOR_FEE` | `0` | Fee per settlement in sompi |
 | `FACILITATOR_FEE_ADDRESS` | signing address | Cold wallet for fee accumulation |
+| `COMPILED_CONTRACT_PATH` | v3 contract | Path to compiled covenant JSON |
+| `CTOR_ARGS_PATH` | v3 ctor | Path to constructor args JSON |
 | `KASPA_RPC` | `ws://tn12-node.kaspa.com:17210` | wRPC URL |
 | `KASPA_NETWORK` | `kaspa:testnet-12` | CAIP-2 network |
 | `PORT` | `4020` | Listen port |
@@ -219,6 +231,8 @@ Fund it with at least 10 KAS on TN12 (faucet or another wallet).
 
 ### Step 4: Start the Facilitator
 
+Any key works — the v3 contract accepts any facilitator:
+
 ```bash
 FACILITATOR_PRIVATE_KEY=<your-facilitator-key> \
   node packages/facilitator/dist/server.js
@@ -229,7 +243,7 @@ Output:
 [x402-facilitator] Listening on :4020
 [x402-facilitator] Network: kaspa:testnet-12
 [x402-facilitator] Pubkey:  <hex>
-[x402-facilitator] Address: kaspatest:qz...
+[x402-facilitator] Signing: kaspatest:qz...
 [x402-facilitator] Fee:     0 sompi
 ```
 
@@ -288,16 +302,35 @@ npx tsx test/e2e-full-flow.ts         # Full payment flow with facilitator fee m
 
 ---
 
-## Covenant Contract
+## Covenant Contracts
 
-**Production contract:** `contracts/silverscript/x402-channel-v4-locked.sil`
+Two contract variants are provided:
+
+### v3 — Configurable Facilitator (Development / Self-Hosted)
+
+**Contract:** `contracts/silverscript/x402-channel-v3.sil`
+
+```
+Constructor: (pubkey client, pubkey facilitator, int timeout, int nonce)
+Entrypoint:  settle(sig clientSig, sig facilitatorSig)
+```
+
+4 constructor params (203 bytes). The facilitator pubkey is a **constructor parameter** — anyone can deploy their own facilitator. Use this for local development, testing, or self-hosted deployments.
+
+### v4-locked — Hardcoded Facilitator (KaspaCom Production)
+
+**Contract:** `contracts/silverscript/x402-channel-v4-locked.sil`
 
 ```
 Constructor: (pubkey client, int timeout, int nonce)
 Entrypoint:  settle(sig clientSig, sig facilitatorSig)
 ```
 
-Single-entrypoint (190 bytes). The facilitator pubkey is **hardcoded in the bytecode** (not a constructor parameter). The covenant validates:
+3 constructor params (190 bytes). The facilitator pubkey is **hardcoded in the bytecode**. Only KaspaCom can co-sign. Use this for production deployments on the KaspaCom network.
+
+### Shared Validation Rules
+
+Both contracts validate:
 - Both client and facilitator signed (2-of-2 Schnorr)
 - Payment amount > 0
 - Payment + miner fee <= input value

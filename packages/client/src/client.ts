@@ -102,9 +102,6 @@ export class X402Client {
     timeoutSeconds?: number,
   ): Promise<ChannelInfo> {
     const pubkey = facilitatorPubkey ?? KASPACOM_FACILITATOR_PUBKEY;
-    if (pubkey !== KASPACOM_FACILITATOR_PUBKEY) {
-      throw new Error(`Unauthorized facilitator pubkey. Only KaspaCom facilitator is supported: ${KASPACOM_FACILITATOR_PUBKEY}`);
-    }
     const amount = amountSompi ?? this.config.defaultFunding ?? 1_000_000_000n;
     const timeout = Math.floor(Date.now() / 1000) + (timeoutSeconds ?? this.config.defaultTimeout ?? 86400);
 

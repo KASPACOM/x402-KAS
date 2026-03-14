@@ -30,7 +30,7 @@ const data = await response.json();
 2. Server returns `402 Payment Required` with payment details
 3. SDK automatically deploys a payment channel (first time only)
 4. SDK signs a settle TX and retries the request with payment proof
-5. Facilitator (KaspaCom) co-signs and broadcasts on-chain
+5. Facilitator co-signs and broadcasts on-chain
 6. Server returns the requested data
 
 ## Configuration
@@ -50,7 +50,11 @@ const client = new X402Client({
 The SDK manages payment channels automatically:
 - Opens a channel on first payment (deploys a 2-of-2 covenant)
 - Reuses the channel for subsequent payments (incrementing nonce)
-- Each payment is a settle TX that pays the merchant directly
+- Each payment is a settle TX that pays the facilitator, who forwards to the merchant
+
+## Custom Facilitator
+
+The client accepts any facilitator pubkey. The facilitator is determined by the server's 402 response — the `facilitatorPubkey` field in `PaymentRequirements.extra` tells the client which facilitator to interact with. No hardcoded keys.
 
 ## Links
 
