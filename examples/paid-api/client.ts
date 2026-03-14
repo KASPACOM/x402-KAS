@@ -15,9 +15,12 @@
  */
 
 import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { X402Client } from "../../packages/client/dist/index.js";
 import { extractPatchDescriptor } from "../../packages/covenant/dist/index.js";
 import type { KaspaNetwork, CompiledContract, PaymentRequired } from "../../packages/types/dist/index.js";
+import { w3cwebsocket } from "websocket";
+globalThis.WebSocket = w3cwebsocket as any;
 
 const API_URL = process.env.API_URL ?? "http://localhost:3000";
 const NETWORK = (process.env.KASPA_NETWORK ?? "kaspa:testnet-12") as KaspaNetwork;
@@ -32,9 +35,9 @@ if (!PRIVATE_KEY) {
 
 // Load compiled covenant template
 const contractPath = process.env.COMPILED_CONTRACT_PATH
-  ?? new URL("../../contracts/compiled/x402-channel.json", import.meta.url).pathname;
+  ?? fileURLToPath(new URL("../../contracts/compiled/x402-channel-v4-locked.json", import.meta.url));
 const ctorPath = process.env.CTOR_ARGS_PATH
-  ?? new URL("../../contracts/silverscript/x402-channel-ctor.json", import.meta.url).pathname;
+  ?? fileURLToPath(new URL("../../contracts/silverscript/x402-channel-v4-locked-ctor.json", import.meta.url));
 
 const compiledTemplate: CompiledContract = JSON.parse(readFileSync(contractPath, "utf-8"));
 const ctorArgs = JSON.parse(readFileSync(ctorPath, "utf-8"));
