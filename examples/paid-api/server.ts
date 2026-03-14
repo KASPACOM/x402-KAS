@@ -148,7 +148,9 @@ const server = createServer(async (req, res) => {
           paid: `${PRICE_SOMPI} sompi`,
         });
         return;
-      } catch {
+      } catch (err) {
+        console.error('Patment failed');
+        console.error(err);
         json(res, 400, { error: "Invalid payment header" });
         return;
       }
