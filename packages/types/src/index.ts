@@ -96,6 +96,12 @@ export interface SettlementResponse {
   network?: KaspaNetwork;
   payer?: string;
   blueScore?: number;
+  /** Amount forwarded to merchant (payment minus facilitator fee) in sompi */
+  merchantAmount?: string;
+  /** Facilitator fee retained in sompi */
+  facilitatorFee?: string;
+  /** TX ID of the forward-to-merchant transaction */
+  forwardTransaction?: string;
   errorReason?: string;
 }
 

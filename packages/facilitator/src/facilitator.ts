@@ -302,15 +302,20 @@ export class KaspaFacilitator {
       const minConf = this.config.minConfirmations ?? 10;
       const daaScore = await this.waitForConfirmation(minConf);
 
-      // 11. Forward full payment to merchant (separate standard TX)
-      //     Fees accumulate at facilitator address and are swept separately.
+      // 11. Forward payment to merchant minus facilitator fee (separate standard TX)
+      //     Fee remains at facilitator address and is swept to cold wallet via /sweep.
       const merchantAddress = paymentRequirements.payTo;
+      const facilitatorFee = this.config.feeSompi ?? 0n;
+      const merchantPayment = paymentAmount - facilitatorFee;
 
       let forwardTxId: string | undefined;
-      if (paymentAmount > STANDARD_FEE) {
+      if (merchantPayment > STANDARD_FEE) {
         try {
-          forwardTxId = await this.forwardToMerchant(merchantAddress, paymentAmount);
-          console.log(`[x402-facilitator] Forwarded ${paymentAmount} sompi → merchant (TX: ${forwardTxId})`);
+          forwardTxId = await this.forwardToMerchant(merchantAddress, merchantPayment);
+          console.log(
+            `[x402-facilitator] Forwarded ${merchantPayment} sompi → merchant, ` +
+            `retained ${facilitatorFee} sompi fee (TX: ${forwardTxId})`,
+          );
         } catch (fwdErr) {
           const fwdMsg = fwdErr instanceof Error ? fwdErr.message : String(fwdErr);
           console.error(`[x402-facilitator] Forward failed (settle succeeded): ${fwdMsg}`);
@@ -324,6 +329,9 @@ export class KaspaFacilitator {
         network: this.config.network,
         payer: verifyResult.payer,
         blueScore: Number(daaScore),
+        merchantAmount: merchantPayment.toString(),
+        facilitatorFee: facilitatorFee.toString(),
+        forwardTransaction: forwardTxId,
       };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -332,13 +340,13 @@ export class KaspaFacilitator {
   }
 
   // ----------------------------------------------------------
-  // Internal: Forward full payment to merchant
+  // Internal: Forward payment (minus fee) to merchant
   // ----------------------------------------------------------
 
   /**
-   * After a successful settle, forward the full payment amount to the merchant.
-   * Single output, no fee splitting — fees accumulate at the facilitator address
-   * and are swept separately via sweepFees().
+   * After a successful settle, forward (payment - facilitatorFee) to the merchant.
+   * The retained fee stays at the facilitator signing address and is swept
+   * to the cold wallet via sweepFees().
    */
   private async forwardToMerchant(
     merchantAddress: string,
