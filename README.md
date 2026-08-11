@@ -2,6 +2,14 @@
 
 HTTP 402 payment protocol for Kaspa L1 using SilverScript covenants.
 
+> [!WARNING]
+> This TN12 two-party facilitator experiment is superseded and must not be
+> used for new KaspaCom integrations. Backend-v2 is evaluating
+> [`elldeeone/kaspa-x402` v0.1.0-alpha.10](https://github.com/elldeeone/kaspa-x402/releases/tag/v0.1.0-alpha.10)
+> on TN10 using direct `exact/standard-native` payments and an isolated
+> `batch-settlement` canary. This repository remains available only as
+> historical design and test evidence.
+
 > **Status:** All core flows tested and passing on Kaspa Testnet 12 (TN12). Pure WASM -- no external binary dependencies.
 >
 > **Explorer:** [tn12.kaspa.stream](https://tn12.kaspa.stream) — verify all TXs on-chain
